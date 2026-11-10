@@ -626,7 +626,8 @@ footer .fine { grid-column: 1 / -1; border-top: 1px solid var(--line); padding-t
     CATS.filter((c) => !["new", "series", "all"].includes(c.key)).forEach((c) => {
       const l = all.filter((m) => matchCat(m, c.key)); if (l.length >= 3) html += rowHTML(c.label, l.sort(byNew), "cat:" + c.key);
     });
-    $("#rows").innerHTML = html || `<div class="empty" style="margin-top:30px">Удахгүй шинэ кино, цуврал нэмэгдэнэ.</div>`;
+    if (!all.length) html = `<div class="empty" style="margin-top:30px">Удахгүй шинэ кино, цуврал нэмэгдэнэ.</div><div id="promoSlot"></div>`;
+    $("#rows").innerHTML = html;
     const promo = $("#promo"); promo.hidden = !subPlans().length;
     const slot = $("#promoSlot"); if (slot) slot.replaceWith(promo);
   }
