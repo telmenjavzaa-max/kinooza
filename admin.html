@@ -142,6 +142,7 @@ dialog::backdrop { background: #000c; }
       <button class="tab" role="tab" data-tab="movies" aria-selected="true">Кино, цуврал</button>
       <button class="tab" role="tab" data-tab="plans" aria-selected="false">Багц</button>
       <button class="tab" role="tab" data-tab="payments" aria-selected="false">Төлбөр</button>
+      <button class="tab" role="tab" data-tab="users" aria-selected="false">Хэрэглэгчид</button>
     </nav>
 
     <section id="tab-movies">
@@ -161,6 +162,17 @@ dialog::backdrop { background: #000c; }
       <div class="actions" style="margin-bottom:14px"><button class="btn primary" id="addPlan">+ Шинэ багц нэмэх</button></div>
       <p class="hint" style="margin:0 0 14px">Төлбөр (QPay) холбогдоогүй үед багцууд сайт дээр "удахгүй" гэж харагдана. Багц = бүх кино, цувралыг тодорхой хугацаанд үзэх эрх. "Нэг кино түрээс" нь кино тус бүрийн түрээсийн суурь үнэ. Хуучин үнэ бөглөвөл сайт дээр зурсан үнээр харагдана.</p>
       <div class="plans" id="planCards"></div>
+    </section>
+
+    <section id="tab-users" hidden>
+      <div class="toolbar">
+        <input id="uq" type="search" placeholder="Имэйл эсвэл утасны дугаараар хайх…" aria-label="Хэрэглэгч хайх">
+      </div>
+      <p class="hint" style="margin:0 0 12px">Хэрэглэгч сайтад нэг удаа нэвтэрсэн байх ёстой. "Эрх олгох" товчоор бүх кинонд (багц) эсвэл нэг кино/цувралд тодорхой хоногийн үнэгүй эрх өгнө.</p>
+      <div class="table-wrap"><table>
+        <thead><tr><th>Хэрэглэгч</th><th>Бүртгүүлсэн</th><th>Сүүлд орсон</th><th>Багц</th><th>Түрээс</th><th></th></tr></thead>
+        <tbody id="userRows"></tbody>
+      </table></div>
     </section>
 
     <section id="tab-payments" hidden>
@@ -235,6 +247,28 @@ dialog::backdrop { background: #000c; }
   </form>
 </dialog>
 
+<dialog id="grantDlg" aria-labelledby="gTitle">
+  <form class="dlg" id="grantForm" novalidate>
+    <h2 id="gTitle">Эрх олгох</h2>
+    <p class="hint" id="gWho" style="margin:0"></p>
+    <div class="row">
+      <label class="f">Эрхийн төрөл<select id="gKind"><option value="all">Бүх кино, цуврал (багц)</option><option value="one">Нэг кино / цуврал</option></select></label>
+      <label class="f" id="gMovieWrap" hidden>Кино / цуврал<select id="gMovie"></select></label>
+    </div>
+    <div class="row">
+      <label class="f">Хугацаа<select id="gDays"><option value="1">1 хоног</option><option value="2">2 хоног</option><option value="7">7 хоног</option><option value="30" selected>30 хоног</option><option value="90">90 хоног</option><option value="365">1 жил</option><option value="custom">Өөр…</option></select></label>
+      <label class="f" id="gCustomWrap" hidden>Хоногийн тоо<input id="gCustom" type="number" min="1" max="3650" step="1"></label>
+    </div>
+    <label class="f">Тайлбар (заавал биш)<input id="gNote" maxlength="120" placeholder="Жишээ: бэлэг, бэлнээр төлсөн, тест"></label>
+    <div style="display:grid;gap:8px"><b style="font-size:13px">Одоогийн идэвхтэй эрхүүд</b><div id="gEnts" class="hint">Ачаалж байна…</div></div>
+    <div class="msg" id="gMsg" role="status"></div>
+    <div class="actions">
+      <button type="button" class="btn" data-close>Хаах</button>
+      <button type="submit" class="btn primary" id="gSave">Эрх олгох</button>
+    </div>
+  </form>
+</dialog>
+
 <dialog id="confirmDlg">
   <div class="dlg">
     <h2>Устгах уу?</h2>
@@ -256,7 +290,7 @@ dialog::backdrop { background: #000c; }
   const esc = (s) => String(s ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
   const fmt = (n) => Number(n || 0).toLocaleString("en-US") + "₮";
   const dt = (s) => s ? new Date(s).toLocaleString("mn-MN", { year: "numeric", month: "2-digit", day: "2-digit", hour: "2-digit", minute: "2-digit" }) : "—";
-  const state = { movies: [], videos: {}, plans: [], editing: null, posterFile: null, backFile: null, backClear: false, tags: [], eps: [], epVideos: {} };
+  const state = { movies: [], videos: {}, plans: [], users: [], editing: null, posterFile: null, backFile: null, backClear: false, tags: [], eps: [], epVideos: {} };
   const CAT_TAGS = ["Адал явдал", "Романтик", "Триллер", "Аймшиг", "Ази цуврал", "Түүхэн", "Драм", "Инээдмийн", "Тулаант", "Уран зөгнөлт", "Хүүхэд", "Баримтат"];
 
   function toast(t) { const d = document.createElement("div"); d.className = "toast"; d.textContent = t; d.setAttribute("role", "status"); document.body.appendChild(d); setTimeout(() => d.remove(), 2400); }
@@ -297,8 +331,9 @@ dialog::backdrop { background: #000c; }
   // ---------- Таб ----------
   document.querySelectorAll(".tab").forEach((t) => t.addEventListener("click", () => {
     document.querySelectorAll(".tab").forEach((x) => x.setAttribute("aria-selected", x === t));
-    ["movies", "plans", "payments"].forEach((n) => ($("#tab-" + n).hidden = n !== t.dataset.tab));
+    ["movies", "plans", "payments", "users"].forEach((n) => ($("#tab-" + n).hidden = n !== t.dataset.tab));
     if (t.dataset.tab === "payments") loadPayments();
+    if (t.dataset.tab === "users") loadUsers();
   }));
 
   // ---------- Кинонууд ----------
@@ -536,6 +571,64 @@ dialog::backdrop { background: #000c; }
     $("#confirmDlg").close();
     if (error) { toast("Устгаж чадсангүй: " + error.message); return; }
     $("#editDlg").close(); toast("Устгагдлаа"); loadMovies();
+  });
+
+  // ---------- Хэрэглэгчид ба эрх олгох ----------
+  const dd = (s) => s ? new Date(s).toLocaleDateString("mn-MN", { year: "numeric", month: "2-digit", day: "2-digit" }) : "—";
+  let userTimer = null, grantUser = null;
+  async function loadUsers() {
+    const { data, error } = await sb.rpc("admin_users", { p_search: $("#uq").value.trim() || null, p_limit: 200 });
+    if (error) { $("#userRows").innerHTML = `<tr><td colspan="6" class="empty">Ачаалж чадсангүй: ${esc(error.message)}</td></tr>`; return; }
+    state.users = data || [];
+    $("#userRows").innerHTML = state.users.length ? state.users.map((u) => `
+      <tr>
+        <td><b>${esc(u.label)}</b>${u.is_admin ? ' <span class="pill warn">админ</span>' : ""}</td>
+        <td class="num">${dd(u.created_at)}</td>
+        <td class="num">${dd(u.last_sign_in_at)}</td>
+        <td>${u.sub_until ? `<span class="pill ok">${dd(u.sub_until)} хүртэл</span>` : '<span class="pill off">алга</span>'}</td>
+        <td class="num">${u.rentals || 0}</td>
+        <td><button class="btn sm primary" data-grant="${u.id}">Эрх олгох</button></td>
+      </tr>`).join("") : `<tr><td colspan="6" class="empty">Хэрэглэгч олдсонгүй.</td></tr>`;
+  }
+  $("#uq").addEventListener("input", () => { clearTimeout(userTimer); userTimer = setTimeout(loadUsers, 300); });
+  async function loadGrantEnts() {
+    const { data, error } = await sb.rpc("admin_user_entitlements", { p_user: grantUser.id });
+    if (error) { $("#gEnts").textContent = "Ачаалж чадсангүй: " + error.message; return; }
+    $("#gEnts").innerHTML = (data || []).length ? `<div class="table-wrap"><table style="min-width:0"><tbody>${data.map((e) => `
+      <tr><td>${e.movie_id ? esc(e.movie_title || "Кино #" + e.movie_id) : "<b>Бүх кино (багц)</b>"}</td><td class="num">${dd(e.expires_at)} хүртэл</td><td><span class="pill">${esc(e.source)}</span>${e.note ? ` <span class="hint">${esc(e.note)}</span>` : ""}</td>
+      <td><button type="button" class="btn sm danger" data-revoke="${e.id}">Цуцлах</button></td></tr>`).join("")}</tbody></table></div>` : "Идэвхтэй эрх алга.";
+  }
+  function openGrant(u) {
+    grantUser = u;
+    $("#gWho").textContent = u.label;
+    $("#gKind").value = "all"; $("#gMovieWrap").hidden = true;
+    $("#gMovie").innerHTML = state.movies.map((m) => `<option value="${m.id}">${esc(m.title)}${m.kind === "series" ? " (цуврал)" : ""}</option>`).join("");
+    $("#gDays").value = "30"; $("#gCustomWrap").hidden = true; $("#gCustom").value = ""; $("#gNote").value = "";
+    $("#gMsg").textContent = ""; $("#gMsg").className = "msg"; $("#gEnts").textContent = "Ачаалж байна…";
+    $("#grantDlg").showModal(); loadGrantEnts();
+  }
+  $("#gKind").addEventListener("change", () => { $("#gMovieWrap").hidden = $("#gKind").value !== "one"; });
+  $("#gDays").addEventListener("change", () => { $("#gCustomWrap").hidden = $("#gDays").value !== "custom"; if ($("#gDays").value === "custom") $("#gCustom").focus(); });
+  document.addEventListener("click", async (e) => {
+    const g = e.target.closest("[data-grant]"); if (g) { openGrant(state.users.find((u) => u.id === g.dataset.grant)); return; }
+    const r = e.target.closest("[data-revoke]"); if (!r) return;
+    if (!confirm("Энэ эрхийг одоо цуцлах уу?")) return;
+    const { error } = await sb.rpc("admin_revoke", { p_entitlement: +r.dataset.revoke });
+    if (error) { toast("Цуцалж чадсангүй: " + error.message); return; }
+    toast("Эрх цуцлагдлаа"); loadGrantEnts(); loadUsers();
+  });
+  $("#grantForm").addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const msg = $("#gMsg");
+    const days = $("#gDays").value === "custom" ? Math.round(+$("#gCustom").value) : +$("#gDays").value;
+    if (!(days >= 1 && days <= 3650)) { msg.className = "msg err"; msg.textContent = "Хоногийн тоог 1–3650 хооронд бичнэ үү."; return; }
+    const movie = $("#gKind").value === "one" ? +$("#gMovie").value : null;
+    $("#gSave").disabled = true; msg.className = "msg"; msg.textContent = "Олгож байна…";
+    const { data, error } = await sb.rpc("admin_grant", { p_user: grantUser.id, p_movie: movie, p_days: days, p_note: $("#gNote").value.trim() || null });
+    $("#gSave").disabled = false;
+    if (error) { msg.className = "msg err"; msg.textContent = "Олгож чадсангүй: " + error.message; return; }
+    msg.className = "msg ok"; msg.textContent = `Эрх олгогдлоо: ${dd(data)} хүртэл.`;
+    toast("Эрх олгогдлоо"); loadGrantEnts(); loadUsers();
   });
 
   // ---------- Багц / үнэ ----------
