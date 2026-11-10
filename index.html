@@ -581,8 +581,9 @@ footer .fine { grid-column: 1 / -1; border-top: 1px solid var(--line); padding-t
   // ---------- Харуулах ----------
   const byNew = (a, b) => new Date(b.created_at) - new Date(a.created_at) || b.id - a.id;
   const byTop = (a, b) => (b.views || 0) - (a.views || 0) || byNew(a, b);
+  const BRAND_IMG = (cfg.SUPABASE_URL || "") + "/storage/v1/object/public/posters/demo/kinooza-hero.jpg";
   function heroItems() {
-    return [...state.movies].filter((m) => m.backdrop_url || m.poster_url).sort((a, b) => (b.featured === true) - (a.featured === true) || byNew(a, b)).slice(0, 6);
+    return [{ id: "brand", brand: true, poster_url: BRAND_IMG }].concat([...state.movies].filter((m) => m.backdrop_url || m.poster_url).sort((a, b) => (b.featured === true) - (a.featured === true) || byNew(a, b)).slice(0, 6));
   }
   function renderHero() {
     const items = heroItems();
@@ -593,6 +594,12 @@ footer .fine { grid-column: 1 / -1; border-top: 1px solid var(--line); padding-t
       const on = i === state.hero, ti = on ? 0 : -1;
       const bg = m.backdrop_url ? `<div class="bg" style="background-image:url('${esc(m.backdrop_url)}')"></div>`
         : `<div class="bg blur" style="background-image:url('${esc(m.poster_url)}')"></div><img class="art" src="${esc(m.poster_url)}" alt="" ${i ? 'loading="lazy"' : 'fetchpriority="high"'}>`;
+      if (m.brand) return `<div class="slide brand${on ? " on" : ""}" aria-hidden="${!on}">${bg}
+        <div class="cap">
+          <h2>Ази кино, цувралын шинэ ертөнц</h2>
+          <div class="chips-mini"><span>Хятад</span><span>Солонгос</span><span>Цуврал</span><span>HD</span></div>
+          <div class="go"><button class="btn primary" data-brandgo tabindex="${ti}">${playIc.replace("<svg", '<svg fill="currentColor"')} Үзэж эхлэх</button></div>
+        </div></div>`;
       return `<div class="slide${on ? " on" : ""}" data-open="${m.id}" aria-hidden="${!on}">${bg}
         <div class="cap">
           <h2>${esc(m.title)}</h2>
@@ -971,6 +978,7 @@ footer .fine { grid-column: 1 / -1; border-top: 1px solid var(--line); padding-t
     const t = (s) => e.target.closest(s);
     let el;
     if ((el = t("[data-buy]"))) { if (!el.disabled) buy(el.dataset.buy, el.dataset.movie ? +el.dataset.movie : null); return; }
+    if ((el = t("[data-brandgo]"))) { const r = $("#hero").nextElementSibling; if (r) r.scrollIntoView({ behavior: "smooth", block: "start" }); return; }
     if ((el = t("[data-playep]"))) { playEpisode(+el.dataset.playep); return; }
     if ((el = t("[data-play]"))) { if (!el.disabled) play(+el.dataset.play); return; }
     if ((el = t("[data-resume]"))) { play(+el.dataset.resume); return; }
