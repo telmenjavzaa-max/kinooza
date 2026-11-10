@@ -1,0 +1,78 @@
+<!doctype html>
+<html lang="mn">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Нууцлалын бодлого — Kinooza</title>
+<meta name="theme-color" content="#0b0912">
+<link rel="icon" type="image/png" href="img/favicon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Rubik:wght@400;600;700&display=swap">
+<style>
+:root { --bg: #0b0912; --surface: #17121f; --line: #2b2337; --fg: #f4f1f7; --muted: #9b93a8; --brass: #ff2d55; color-scheme: dark; }
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--bg); color: var(--fg); font-family: "Rubik", "Segoe UI", system-ui, sans-serif; font-size: 16px; line-height: 1.65; }
+.wrap { max-width: 760px; margin: 0 auto; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); padding-block: 32px 60px; }
+a { color: var(--brass); }
+.back { display: inline-block; margin-bottom: 24px; text-decoration: none; font-weight: 600; }
+h1 { font-family: "Rubik", sans-serif; font-size: clamp(24px, 5vw, 34px); line-height: 1.15; margin: 0 0 8px; text-wrap: balance; }
+.updated { color: var(--muted); font-size: 14px; margin: 0 0 28px; }
+h2 { font-size: 18px; margin: 32px 0 8px; }
+p, li { color: #e6d9d2; }
+ul { padding-left: 20px; }
+.box { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 16px 18px; }
+</style>
+</head>
+<body>
+<main class="wrap">
+  <a class="back" href="./">← Kinooza руу буцах</a>
+  <h1>Нууцлалын бодлого</h1>
+  <p class="updated">Сүүлд шинэчилсэн: 2026 оны 11-р сарын 10</p>
+
+  <p>Kinooza таны хувийн мэдээллийг хэрхэн цуглуулж, ашиглаж, хамгаалдгийг энэ хуудсанд тайлбарлав.</p>
+
+  <h2>1. Бидний цуглуулдаг мэдээлэл</h2>
+  <ul>
+    <li><b>Нэвтрэх мэдээлэл:</b> Google-ээр нэвтрэхэд таны имэйл хаяг, нэр.</li>
+    <li><b>Төлбөрийн мэдээлэл:</b> таны худалдан авсан эрх (сарын эрх эсвэл кино түрээс), дүн, огноо. Банкны карт, дансны мэдээллийг бид <b>хадгалдаггүй</b> — төлбөрийг QPay болон таны банк шууд гүйцэтгэнэ.</li>
+    <li><b>Сайтын хэрэглээ:</b> "Миний жагсаалт"-д нэмсэн кинонууд, кино/ангийг хаана хүртэл үзсэн байрлал ("Үргэлжлүүлж үзэх"), үзэлтийн тоо.</li>
+    <li><b>Хэмжилт (Meta Pixel):</b> сайтад зочилсон, кино үзсэн, төлбөр эхлүүлсэн/төлсөн зэрэг үйлдлийг Meta (Facebook)-ийн Pixel-ээр хэмжинэ. Энэ нь Facebook дээрх зар сурталчилгааг сайжруулахад ашиглагдана.</li>
+  </ul>
+
+  <h2>2. Мэдээллийг юунд ашигладаг вэ</h2>
+  <ul>
+    <li>Таныг нэвтрүүлж, худалдан авсан киногоо үзэх эрхийг олгох</li>
+    <li>Төлбөрийг баталгаажуулах, асуудал гарвал шалгах</li>
+        <li>Сайт болон зар сурталчилгааг сайжруулах</li>
+  </ul>
+  <p>Бид таны мэдээллийг гуравдагч этгээдэд <b>худалддаггүй</b>.</p>
+
+  <h2>3. Ашигладаг үйлчилгээ үзүүлэгчид</h2>
+  <ul>
+    <li><b>Supabase</b> — нэвтрэлт болон өгөгдлийн сан</li>
+    <li><b>QPay</b> — төлбөр хүлээн авах (холбогдсоны дараа)</li>
+    <li><b>Kinescope</b> — видео тоглуулах (таны нэвтэрсэн утас/имэйлийн хэсгийг видео дээр усан тэмдэг болгон харуулж болно)</li>
+    <li><b>Google</b> — Google-ээр нэвтрэх</li>
+    <li><b>Meta (Facebook)</b> — Pixel хэмжилт</li>
+    <li><b>GitHub Pages</b> — вэбсайтыг байршуулах</li>
+  </ul>
+
+  <h2>4. Күүки ба Meta Pixel</h2>
+  <p>Сайт таныг нэвтэрсэн байдлаа хадгалахын тулд хөтчийн санах ой (localStorage) ашиглана. Meta Pixel нь Facebook-ийн күүки ашигладаг. Та хөтчийн тохиргооноосоо гуравдагч талын күүкиг хааж, эсвэл Facebook-ийн <a href="https://www.facebook.com/adpreferences" target="_blank" rel="noopener">зарын тохиргоо</a>-оос зар сурталчилгааны хэмжилтийг хязгаарлаж болно.</p>
+
+  <h2>5. Таны эрх</h2>
+  <p>Та өөрийн мэдээллийг харах, засах, эсвэл бүртгэлээ бүрмөсөн устгуулах хүсэлт гаргах эрхтэй. Хүсэлтээ манай <a class="fb">Facebook пэйж</a> рүү мессежээр илгээнэ үү — бид 14 хоногт багтаан шийдвэрлэнэ.</p>
+
+  <h2>6. Холбоо барих</h2>
+  <div class="box">
+    <p style="margin:0">Kinooza<br><a id="fbLink" target="_blank" rel="noopener">Facebook пэйж: Kino tanhim</a> — мессежээр холбогдоно уу</p>
+  </div>
+</main>
+<script src="config.js"></script>
+<script>
+  const fb = (window.KINO_CONFIG || {}).FB_PAGE_URL;
+  if (fb) document.querySelectorAll("#fbLink, a.fb").forEach((a) => { a.href = fb; a.target = "_blank"; a.rel = "noopener"; });
+</script>
+</body>
+</html>

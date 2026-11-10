@@ -1,0 +1,1017 @@
+<!doctype html>
+<html lang="mn">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Kinooza — Кино, цуврал онлайнаар</title>
+<meta name="description" content="Kinooza — шинэ кино, ази цуврал, романтик, триллерийг онлайнаар өндөр чанартай үзээрэй">
+<meta name="theme-color" content="#0b0912">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Kinooza — Кино, цуврал онлайнаар">
+<meta property="og:description" content="Шинэ кино, цувралыг хязгааргүй үзээрэй">
+<meta property="og:image" content="img/icon-512.png">
+<link rel="icon" type="image/png" href="img/favicon.png">
+<link rel="apple-touch-icon" href="img/apple-touch-icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Rubik:wght@400;500;600;700;800&family=Prata&display=swap">
+<style>
+:root {
+  --bg: #0b0912;
+  --bg-2: #120e1c;
+  --surface: #17121f;
+  --surface-2: #211a2c;
+  --line: #2b2337;
+  --fg: #f4f1f7;
+  --muted: #9b93a8;
+  --red: #ff2d55;
+  --red-2: #e0123f;
+  --red-ink: #ffffff;
+  --ok: #4ade80;
+  --err: #ff8c95;
+  --ui: "Rubik", "Segoe UI", system-ui, sans-serif;
+  --title: "Prata", "Times New Roman", serif;
+  --radius: 12px;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+[hidden] { display: none !important; }
+html { -webkit-text-size-adjust: 100%; }
+body {
+  margin: 0; color: var(--fg); font-family: var(--ui); font-size: 15px; line-height: 1.5; min-height: 100vh;
+  background:
+    radial-gradient(900px 500px at 15% -10%, #3a0f2a55, transparent 60%),
+    radial-gradient(800px 500px at 100% 20%, #2a124a44, transparent 60%),
+    var(--bg);
+  background-attachment: fixed;
+}
+img { max-width: 100%; }
+button, input, select, textarea { font: inherit; color: inherit; }
+button { cursor: pointer; }
+a { color: var(--red); }
+:focus-visible { outline: 2px solid var(--red); outline-offset: 2px; }
+.wrap { max-width: 1320px; margin: 0 auto; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+
+/* ---------- Толгой ---------- */
+header.top { position: sticky; top: 0; z-index: 30; padding-top: env(safe-area-inset-top, 0px); background: color-mix(in srgb, var(--bg) 88%, transparent); backdrop-filter: blur(14px); border-bottom: 1px solid #ffffff0a; }
+.bar { display: flex; align-items: center; gap: 14px; height: 64px; }
+.brand { flex: 0 0 auto; display: flex; align-items: center; }
+.brand img { height: 34px; width: auto; display: block; }
+nav.main { display: flex; gap: 4px; margin-left: 8px; }
+nav.main button { border: 0; background: none; height: 36px; padding: 0 14px; border-radius: 10px; display: inline-flex; align-items: center; gap: 7px; color: #d9d3e2; font-weight: 500; font-size: 14px; white-space: nowrap; }
+nav.main button svg { width: 16px; height: 16px; stroke: currentColor; fill: none; stroke-width: 2; }
+nav.main button:hover { background: #ffffff0d; color: #fff; }
+nav.main button[aria-current="page"] { background: linear-gradient(180deg, #ff2d5533, #ff2d5518); color: #fff; box-shadow: inset 0 0 0 1px #ff2d5555; }
+.spacer { flex: 1; }
+.search { position: relative; flex: 0 1 300px; min-width: 0; }
+.search input { width: 100%; height: 40px; padding: 0 40px 0 16px; border-radius: 12px; border: 1px solid var(--line); background: #ffffff08; font-size: 14px; }
+.search input::placeholder { color: var(--muted); }
+.search svg { position: absolute; right: 13px; top: 50%; translate: 0 -50%; width: 17px; height: 17px; stroke: var(--muted); fill: none; stroke-width: 2; pointer-events: none; }
+.icon-btn { flex: 0 0 auto; width: 40px; height: 40px; border-radius: 50%; border: 1px solid var(--line); background: #ffffff08; display: grid; place-items: center; padding: 0; font-weight: 700; position: relative; }
+.icon-btn svg { width: 19px; height: 19px; stroke: var(--fg); fill: none; stroke-width: 2; }
+.icon-btn.on { background: linear-gradient(145deg, var(--red), var(--red-2)); border-color: transparent; color: #fff; }
+.menu { position: absolute; right: max(16px, env(safe-area-inset-right, 0px)); top: calc(60px + env(safe-area-inset-top, 0px)); width: 250px; background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 8px; box-shadow: 0 24px 50px -14px #000d; z-index: 40; }
+.menu .who { padding: 8px 10px 2px; font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.menu .access { padding: 0 10px 8px; font-size: 12px; color: var(--ok); }
+.menu button { width: 100%; text-align: left; border: 0; background: none; padding: 9px 10px; border-radius: 9px; font-weight: 500; }
+.menu button:hover { background: var(--surface-2); }
+.catmenu { position: absolute; top: calc(58px + env(safe-area-inset-top, 0px)); width: 260px; background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 8px; z-index: 40; box-shadow: 0 24px 50px -14px #000d; display: grid; grid-template-columns: 1fr 1fr; gap: 4px; }
+.catmenu button { border: 0; background: none; text-align: left; padding: 9px 10px; border-radius: 9px; font-size: 13px; font-weight: 500; }
+.catmenu button:hover { background: var(--surface-2); }
+nav.mob { display: none; }
+
+/* ---------- Слайдер ---------- */
+.hero { position: relative; margin-top: 18px; height: clamp(320px, 40vw, 470px); border-radius: 20px; overflow: hidden; background: var(--surface); isolation: isolate; box-shadow: 0 30px 60px -30px #000; }
+.slide { position: absolute; inset: 0; opacity: 0; visibility: hidden; transition: opacity .7s ease, visibility .7s; cursor: pointer; }
+.slide.on { opacity: 1; visibility: visible; }
+.slide .bg { position: absolute; inset: 0; background-size: cover; background-position: center 25%; }
+.slide .bg.blur { inset: -40px; filter: blur(30px) saturate(1.3) brightness(.55); }
+.slide .art { position: absolute; right: 8%; top: 0; height: 100%; width: auto; max-width: none; box-shadow: 0 0 80px 10px #0009; }
+.slide::after { content: ""; position: absolute; inset: 0; background: linear-gradient(90deg, #0b0912f2 0%, #0b0912b0 32%, transparent 62%), linear-gradient(0deg, #0b0912cc 0%, transparent 40%); pointer-events: none; }
+.slide .cap { position: absolute; left: clamp(20px, 5vw, 64px); bottom: clamp(36px, 6vw, 64px); max-width: min(560px, 80%); z-index: 2; }
+.slide h2 { font-family: var(--title); font-weight: 400; font-size: clamp(30px, 4.6vw, 58px); line-height: 1.05; margin: 0 0 14px; text-wrap: balance; color: #fbe7c6; text-shadow: 0 2px 0 #7a4a1a, 0 4px 24px #000c; }
+.chips-mini { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 18px; }
+.chips-mini span { font-size: 12px; font-weight: 500; padding: 4px 12px; border-radius: 99px; background: #ffffff14; border: 1px solid #ffffff22; backdrop-filter: blur(6px); }
+.go { display: flex; gap: 10px; flex-wrap: wrap; }
+.dots { position: absolute; left: 50%; translate: -50% 0; bottom: 16px; z-index: 3; display: flex; gap: 6px; }
+.dots button { width: 8px; height: 8px; padding: 0; border-radius: 99px; border: 0; background: #ffffff44; transition: width .3s, background .3s; }
+.dots button[aria-current="true"] { width: 24px; background: var(--red); }
+.hero .nav { position: absolute; top: 50%; translate: 0 -50%; z-index: 3; width: 42px; height: 42px; border-radius: 50%; border: 1px solid #ffffff22; background: #0008; color: #fff; font-size: 22px; display: grid; place-items: center; }
+.hero .nav.prev { left: 14px; } .hero .nav.next { right: 14px; }
+
+.btn { border: 1px solid var(--line); background: var(--surface-2); padding: 11px 20px; border-radius: 12px; font-weight: 600; font-size: 14px; text-decoration: none; display: inline-flex; align-items: center; justify-content: center; gap: 8px; white-space: nowrap; }
+.btn svg { width: 16px; height: 16px; }
+.btn:hover { border-color: #ffffff33; }
+.btn.primary { background: linear-gradient(180deg, var(--red), var(--red-2)); color: var(--red-ink); border-color: transparent; box-shadow: 0 10px 24px -10px #ff2d55aa; }
+.btn.primary:hover { filter: brightness(1.08); }
+.btn.glass { background: #ffffff14; border-color: #ffffff2a; backdrop-filter: blur(8px); }
+.btn.ghost { background: transparent; }
+.btn.wide { width: 100%; }
+.btn[disabled] { opacity: .5; cursor: default; }
+
+/* ---------- Ангиллын хавтан ---------- */
+.cats { display: grid; grid-template-columns: repeat(8, minmax(0, 1fr)); gap: 10px; margin-top: 22px; }
+.cat { border: 1px solid var(--line); background: linear-gradient(180deg, #ffffff0a, #ffffff03); border-radius: 14px; padding: 14px 8px 12px; display: grid; justify-items: center; gap: 8px; font-size: 12.5px; font-weight: 500; color: #ddd6e6; text-align: center; transition: border-color .2s, transform .2s, background .2s; }
+.cat:hover { border-color: #ff2d5577; transform: translateY(-2px); background: linear-gradient(180deg, #ff2d5518, #ffffff03); }
+.cat .ic { width: 40px; height: 40px; border-radius: 12px; display: grid; place-items: center; background: var(--c, #ff2d55)22; color: var(--c, #ff2d55); }
+.cat .ic svg { width: 21px; height: 21px; stroke: currentColor; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+
+/* ---------- Эгнээ ---------- */
+.row { margin-top: 34px; }
+.row-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 14px; }
+.row-head h3 { margin: 0; font-weight: 700; font-size: 19px; display: flex; align-items: center; gap: 10px; }
+.row-head h3::before { content: ""; width: 4px; height: 20px; border-radius: 4px; background: linear-gradient(180deg, var(--red), var(--red-2)); }
+.row-head button { border: 0; background: none; color: var(--muted); font-size: 13px; font-weight: 500; padding: 4px 0; }
+.row-head button:hover { color: #fff; }
+.track-wrap { position: relative; }
+.track { display: grid; grid-auto-flow: column; grid-auto-columns: 172px; gap: 14px; overflow-x: auto; scroll-snap-type: x mandatory; scrollbar-width: none; padding: 4px 2px 6px; }
+.track::-webkit-scrollbar { display: none; }
+.track > * { scroll-snap-align: start; }
+.track.top { grid-auto-columns: 228px; gap: 10px; }
+.arrow { position: absolute; top: 40%; translate: 0 -50%; z-index: 4; width: 40px; height: 40px; border-radius: 50%; border: 1px solid var(--line); background: color-mix(in srgb, var(--bg) 85%, transparent); font-size: 20px; display: grid; place-items: center; opacity: 0; transition: opacity .2s; }
+.track-wrap:hover .arrow { opacity: 1; }
+.arrow.l { left: -12px; } .arrow.r { right: -12px; }
+@media (hover: none) { .arrow, .hero .nav { display: none; } }
+
+.card { background: none; border: 0; padding: 0; text-align: left; display: flex; flex-direction: column; gap: 9px; min-width: 0; }
+.poster { position: relative; aspect-ratio: 2 / 3; width: 100%; border-radius: var(--radius); overflow: hidden; background: linear-gradient(160deg, hsl(var(--h1) 60% 32%), hsl(var(--h2) 55% 12%)); display: flex; flex-direction: column; justify-content: center; padding: 12px; isolation: isolate; box-shadow: 0 0 0 1px #ffffff10; transition: transform .25s ease, box-shadow .25s ease; }
+.poster img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; z-index: 1; transition: transform .45s ease; }
+.card:hover .poster, .card:focus-visible .poster { transform: translateY(-3px); box-shadow: 0 0 0 1px #ff2d5566, 0 18px 34px -16px #000; }
+.card:hover .poster img { transform: scale(1.05); }
+.poster .p-title { font-family: var(--title); font-size: 18px; line-height: 1.15; color: #fff; text-align: center; text-wrap: balance; overflow-wrap: anywhere; }
+.poster .play { position: absolute; inset: 0; z-index: 2; display: grid; place-items: center; opacity: 0; transition: opacity .25s; background: #0006; }
+.poster .play i { width: 48px; height: 48px; border-radius: 50%; background: linear-gradient(180deg, var(--red), var(--red-2)); display: grid; place-items: center; box-shadow: 0 8px 20px -6px #ff2d55; }
+.poster .play svg { width: 18px; height: 18px; fill: #fff; margin-left: 3px; }
+.card:hover .poster .play { opacity: 1; }
+.badge { position: absolute; top: 8px; right: 8px; z-index: 3; font-size: 11px; font-weight: 700; padding: 3px 9px; border-radius: 7px; background: linear-gradient(180deg, var(--red), var(--red-2)); color: #fff; box-shadow: 0 4px 12px -4px #ff2d55; }
+.badge.soon { background: #000b; box-shadow: none; }
+.tag-l { position: absolute; top: 8px; left: 8px; z-index: 3; font-size: 10.5px; font-weight: 600; padding: 3px 8px; border-radius: 7px; background: #000a; color: #fff; }
+.poster .info { position: absolute; left: 0; right: 0; bottom: 0; z-index: 2; padding: 28px 10px 9px; background: linear-gradient(0deg, #000d, transparent); font-size: 11.5px; font-weight: 500; color: #eee; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.card .name { font-weight: 600; font-size: 14px; line-height: 1.3; color: var(--fg); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.card .prog { height: 3px; border-radius: 3px; background: #ffffff1f; overflow: hidden; margin-top: -4px; }
+.card .prog i { display: block; height: 100%; background: var(--red); }
+.card .left { font-size: 12px; color: var(--muted); margin-top: -5px; }
+/* Топ */
+.topcard { display: flex; align-items: flex-end; gap: 0; background: none; border: 0; padding: 0; text-align: left; }
+.topcard .num { flex: 0 0 auto; width: 74px; font-family: var(--ui); font-weight: 800; font-size: 118px; line-height: .8; letter-spacing: -6px; color: transparent; -webkit-text-stroke: 2px #ffffff55; margin-right: -12px; z-index: 1; transform: translateY(6px); }
+.topcard:hover .num { -webkit-text-stroke-color: var(--red); }
+.topcard .card { flex: 1; }
+
+/* ---------- Багцын баннер ---------- */
+.promo { margin-top: 40px; border-radius: 20px; padding: 22px clamp(18px, 4vw, 34px); display: flex; align-items: center; gap: 22px; background: linear-gradient(100deg, #3b0f22 0%, #22102e 55%, #2a0c1f 100%); border: 1px solid #ff2d5533; position: relative; overflow: hidden; }
+.promo::before { content: ""; position: absolute; right: -60px; top: -60px; width: 260px; height: 260px; border-radius: 50%; background: radial-gradient(circle, #ff2d5544, transparent 70%); }
+.promo .pop { flex: 0 0 auto; width: 74px; height: 74px; }
+.promo h3 { margin: 0 0 8px; font-size: clamp(16px, 2vw, 20px); font-weight: 700; display: flex; align-items: center; gap: 8px; }
+.promo h3 svg { width: 20px; height: 20px; fill: #ffc24b; flex: 0 0 auto; }
+.promo ul { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 6px 20px; color: #d8cfe2; font-size: 13px; }
+.promo li { display: flex; align-items: center; gap: 6px; }
+.promo li::before { content: "✓"; color: var(--red); font-weight: 700; }
+.promo .txt { flex: 1; min-width: 0; position: relative; }
+.promo .btn { position: relative; }
+
+/* ---------- Бүх кино ---------- */
+.browse-head { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; justify-content: space-between; margin-block: 26px 14px; }
+.browse-head h1 { font-weight: 700; font-size: 24px; margin: 0; display: flex; align-items: center; gap: 10px; }
+.browse-head h1::before { content: ""; width: 4px; height: 24px; border-radius: 4px; background: var(--red); }
+.browse-head .ctl { display: flex; gap: 10px; align-items: center; }
+select { height: 38px; padding: 0 12px; border-radius: 10px; border: 1px solid var(--line); background: var(--surface); font-size: 13px; }
+.chips { display: flex; gap: 8px; overflow-x: auto; scrollbar-width: none; margin-bottom: 20px; padding-bottom: 2px; }
+.chips::-webkit-scrollbar { display: none; }
+.chip { flex: 0 0 auto; border: 1px solid var(--line); background: var(--surface); padding: 7px 15px; border-radius: 99px; font-size: 13px; font-weight: 500; color: #cfc7da; }
+.chip[aria-pressed="true"] { background: var(--red); color: #fff; border-color: var(--red); }
+.count { font-size: 12px; color: var(--muted); }
+.grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(165px, 1fr)); gap: 24px 14px; }
+.empty { padding: 44px 20px; text-align: center; color: var(--muted); border: 1px dashed var(--line); border-radius: 14px; grid-column: 1 / -1; }
+main { padding-bottom: 56px; }
+
+/* ---------- Цонхнууд ---------- */
+dialog { border: 1px solid var(--line); background: var(--bg-2); color: var(--fg); border-radius: 18px; padding: 0; width: min(900px, calc(100vw - 24px)); max-height: calc(100vh - 32px); }
+dialog::backdrop { background: #000c; backdrop-filter: blur(4px); }
+#authDlg, #payDlg, #promoDlg { width: min(440px, calc(100vw - 32px)); }
+.close-x { position: absolute; top: 12px; right: 12px; z-index: 5; border: 0; background: #000a; width: 36px; height: 36px; border-radius: 50%; font-size: 19px; color: #fff; }
+.d-hero { position: relative; min-height: 220px; background: var(--surface) center 25% / cover no-repeat; }
+.d-hero::after { content: ""; position: absolute; inset: 0; background: linear-gradient(0deg, var(--bg-2) 0%, #0b091299 45%, #0b091233 100%); }
+.d-head { position: relative; z-index: 2; display: grid; grid-template-columns: 150px minmax(0, 1fr); gap: 20px; padding: 0 24px; margin-top: -120px; align-items: end; }
+.d-head .poster { box-shadow: 0 20px 40px -14px #000, 0 0 0 1px #ffffff14; }
+.d-head h2 { font-family: var(--title); font-weight: 400; font-size: clamp(24px, 3.4vw, 34px); line-height: 1.1; margin: 0 0 10px; padding-right: 30px; text-wrap: balance; }
+.facts { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 14px; }
+.facts span { font-size: 12px; font-weight: 500; padding: 4px 11px; border-radius: 99px; background: #ffffff10; border: 1px solid #ffffff1a; color: #e2dbe9; }
+.d-body { padding: 18px 24px 26px; display: grid; gap: 18px; }
+.d-body p { margin: 0; color: #d9d2e2; }
+.actions { display: flex; gap: 10px; flex-wrap: wrap; }
+.player { aspect-ratio: 16 / 9; width: 100%; background: #000; border-bottom: 1px solid var(--line); }
+.player iframe, .player #kp, .player #kp iframe { width: 100%; height: 100%; border: 0; display: block; }
+.now-playing { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 12px 24px; border-bottom: 1px solid var(--line); font-size: 14px; }
+.now-playing b { font-weight: 600; }
+.seasons { display: flex; gap: 8px; flex-wrap: wrap; }
+.eps { display: grid; gap: 8px; }
+.ep { display: grid; grid-template-columns: 44px minmax(0, 1fr) auto; align-items: center; gap: 12px; padding: 10px 12px; border-radius: 12px; border: 1px solid var(--line); background: #ffffff05; text-align: left; width: 100%; }
+.ep:hover { border-color: #ff2d5566; background: #ff2d550d; }
+.ep.cur { border-color: var(--red); background: #ff2d5514; }
+.ep .n { width: 44px; height: 44px; border-radius: 10px; background: var(--surface-2); display: grid; place-items: center; font-weight: 700; }
+.ep .t, .ep .s { display: block; }
+.ep .t { font-weight: 600; font-size: 14px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.ep .s { font-size: 12px; color: var(--muted); }
+.ep .r { font-size: 12px; color: var(--muted); }
+.ep .r.pg { color: var(--red); font-weight: 600; }
+.sec-title { font-weight: 700; font-size: 16px; margin: 0; }
+.note { font-size: 13px; color: var(--muted); margin: 0; }
+
+.pay { padding: 26px; display: grid; gap: 14px; }
+.pay h2 { margin: 0; font-size: 21px; padding-right: 30px; text-wrap: balance; }
+.plan { display: grid; grid-template-columns: 1fr auto; align-items: center; gap: 4px 12px; text-align: left; width: 100%; padding: 14px 16px; border-radius: 12px; border: 1px solid var(--line); background: var(--bg); }
+.plan:hover:not([disabled]) { border-color: var(--red); }
+.plan[disabled] { opacity: .7; cursor: default; }
+.plan b { font-size: 15px; }
+.plan .price { font-size: 17px; font-weight: 800; color: var(--red); grid-row: span 2; }
+.plan .price s, .promo-list s { color: var(--muted); font-weight: 500; font-size: 12px; margin-right: 6px; }
+.plan small { color: var(--muted); font-size: 12px; }
+.pbadge { display: inline-block; margin-left: 6px; font-size: 10px; font-weight: 700; padding: 2px 7px; border-radius: 99px; background: var(--red); color: #fff; vertical-align: 2px; }
+.soon-box { padding: 12px 14px; border-radius: 12px; background: #ff2d5512; border: 1px solid #ff2d5544; font-size: 13px; color: #ffd6de; }
+
+.auth { padding: 26px; display: grid; gap: 14px; }
+.auth h2 { margin: 0; font-size: 22px; }
+.auth .logo { height: 44px; width: auto; justify-self: start; }
+.auth label { display: grid; gap: 4px; font-size: 13px; color: var(--muted); }
+.auth input { width: 100%; padding: 11px 12px; border-radius: 10px; border: 1px solid var(--line); background: var(--bg); }
+.phone-row { display: flex; gap: 8px; }
+.phone-row .cc { flex: 0 0 auto; padding: 11px 10px; border: 1px solid var(--line); border-radius: 10px; background: var(--surface-2); font-weight: 600; }
+.phone-row input { flex: 1; min-width: 0; letter-spacing: .04em; }
+.or { display: flex; align-items: center; gap: 10px; color: var(--muted); font-size: 12px; text-transform: uppercase; letter-spacing: .1em; }
+.or::before, .or::after { content: ""; flex: 1; height: 1px; background: var(--line); }
+.g-logo { width: 18px; height: 18px; }
+.msg { font-size: 13px; min-height: 1.2em; }
+.msg.err { color: var(--err); }
+.msg.ok { color: var(--ok); }
+
+.toast { position: fixed; left: 50%; bottom: calc(84px + env(safe-area-inset-bottom, 0px)); translate: -50% 0; background: var(--fg); color: var(--bg); padding: 10px 16px; border-radius: 10px; font-weight: 600; z-index: 60; }
+
+/* Нээгдэх үеийн лого */
+#splash { position: fixed; inset: 0; z-index: 100; background: radial-gradient(55% 45% at 50% 45%, #2b0d22 0%, var(--bg) 72%); display: grid; place-items: center; transition: opacity .55s ease, visibility .55s; }
+#splash.out { opacity: 0; visibility: hidden; }
+#splash img { width: min(300px, 62vw); height: auto; animation: splashPop .9s cubic-bezier(.2,.8,.2,1) both; filter: drop-shadow(0 0 40px #ff2d5555); }
+#splash .bar2 { position: absolute; bottom: 22%; width: 120px; height: 3px; border-radius: 3px; background: #ffffff1a; overflow: hidden; }
+#splash .bar2 i { display: block; width: 40%; height: 100%; border-radius: 3px; background: var(--red); animation: splashBar 1.1s ease-in-out infinite; }
+@keyframes splashPop { from { opacity: 0; transform: scale(.85); } to { opacity: 1; transform: none; } }
+@keyframes splashBar { from { transform: translateX(-100%); } to { transform: translateX(250%); } }
+
+footer { border-top: 1px solid var(--line); color: var(--muted); font-size: 13px; margin-top: 20px; }
+footer .wrap { padding-block: 30px calc(30px + env(safe-area-inset-bottom, 0px)); display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px 32px; }
+footer img { height: 32px; width: auto; }
+footer h4 { margin: 0 0 8px; font-size: 12px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: var(--fg); }
+footer p { margin: 0 0 4px; }
+footer a { color: var(--muted); }
+footer a:hover { color: var(--red); }
+footer .fine { grid-column: 1 / -1; border-top: 1px solid var(--line); padding-top: 16px; font-size: 12px; }
+
+@media (max-width: 1100px) {
+  nav.main .lbl-hide { display: none; }
+  .cats { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+}
+@media (max-width: 860px) {
+  nav.main { display: none; }
+  nav.mob { display: flex; position: fixed; left: 0; right: 0; bottom: 0; z-index: 35; background: color-mix(in srgb, var(--bg-2) 94%, transparent); backdrop-filter: blur(14px); border-top: 1px solid var(--line); padding: 6px 6px calc(6px + env(safe-area-inset-bottom, 0px)); justify-content: space-around; }
+  nav.mob button { border: 0; background: none; display: grid; justify-items: center; gap: 2px; font-size: 10.5px; color: var(--muted); padding: 4px 8px; min-width: 56px; }
+  nav.mob button svg { width: 21px; height: 21px; stroke: currentColor; fill: none; stroke-width: 2; }
+  nav.mob button[aria-current="page"] { color: var(--red); }
+  main { padding-bottom: 90px; }
+  footer .wrap { padding-bottom: calc(90px + env(safe-area-inset-bottom, 0px)); }
+  #bellBtn { display: none; }
+}
+@media (max-width: 720px) {
+  .bar { gap: 8px; height: 58px; }
+  .brand img { height: 28px; }
+  .search { flex: 1 1 auto; }
+  .hero { border-radius: 14px; height: 116vw; max-height: 540px; margin-top: 12px; }
+  .slide .art { right: 50%; translate: 50% 0; height: 78%; }
+  .slide::after { background: linear-gradient(0deg, #0b0912 0%, #0b0912d9 30%, transparent 62%); }
+  .slide .cap { left: 18px; right: 18px; bottom: 40px; max-width: none; }
+  .cats { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; }
+  .cat { padding: 10px 4px; font-size: 11px; }
+  .cat .ic { width: 34px; height: 34px; }
+  .track { grid-auto-columns: 128px; gap: 10px; }
+  .track.top { grid-auto-columns: 172px; }
+  .topcard .num { width: 56px; font-size: 86px; letter-spacing: -4px; }
+  .row { margin-top: 26px; }
+  .row-head h3 { font-size: 16px; }
+  .grid { grid-template-columns: repeat(auto-fill, minmax(118px, 1fr)); gap: 18px 10px; }
+  .promo { flex-wrap: wrap; }
+  .promo .btn { width: 100%; }
+  .promo .pop { width: 56px; height: 56px; }
+  .d-head { grid-template-columns: 104px minmax(0, 1fr); padding: 0 16px; margin-top: -90px; gap: 14px; }
+  .d-body { padding: 16px 16px 22px; }
+  .now-playing { padding: 10px 16px; }
+}
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; animation: none !important; } }
+</style>
+</head>
+<body>
+
+<div id="splash" aria-hidden="true">
+  <img src="img/logo-full.png" alt="">
+  <div class="bar2"><i></i></div>
+</div>
+<script>
+  try { if (sessionStorage.getItem("kz.splash")) document.getElementById("splash").remove(); else sessionStorage.setItem("kz.splash", "1"); } catch (e) {}
+  window.__splashT0 = Date.now();
+</script>
+
+<header class="top">
+  <div class="wrap">
+    <div class="bar">
+      <a class="brand" href="./" aria-label="Kinooza нүүр"><img src="img/logo-header.png" alt="Kinooza" width="169" height="40"></a>
+      <nav class="main" aria-label="Цэс">
+        <button data-view="home" aria-current="page"><svg viewBox="0 0 24 24"><path d="M3 11 12 4l9 7v9a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/></svg>Нүүр</button>
+        <button data-view="series"><svg viewBox="0 0 24 24"><rect x="3" y="6" width="18" height="13" rx="2"/><path d="m8 2 4 4 4-4"/></svg>Цуврал</button>
+        <button id="catBtn" aria-haspopup="true"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>Ангилал ▾</button>
+        <button data-view="new"><svg viewBox="0 0 24 24"><path d="M12 3c1 3 4 4.5 4 8.5A4 4 0 0 1 8 12c0-1.5.6-2.6 1.5-3.5C9.6 11 11 11.5 11 11.5 10 8 12 5 12 3z"/><path d="M6 15a6 6 0 0 0 12 0"/></svg>Шинэ</button>
+        <button data-view="top"><svg viewBox="0 0 24 24"><path d="m12 3 2.7 5.6 6.1.9-4.4 4.3 1 6.1L12 17l-5.4 2.9 1-6.1L3.2 9.5l6.1-.9z"/></svg>Топ</button>
+      </nav>
+      <span class="spacer"></span>
+      <label class="search">
+        <input id="q" type="search" placeholder="Кино, цуврал хайх..." aria-label="Кино, цуврал хайх" autocomplete="off">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+      </label>
+      <button class="icon-btn" id="bellBtn" aria-label="Мэдэгдэл"><svg viewBox="0 0 24 24"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 8 3 8H3s3-1 3-8"/><path d="M10 20a2 2 0 0 0 4 0"/></svg></button>
+      <button class="icon-btn" id="userBtn" aria-label="Нэвтрэх"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21c1.5-4 4.5-6 8-6s6.5 2 8 6"/></svg></button>
+    </div>
+  </div>
+  <div class="catmenu" id="catMenu" hidden></div>
+  <div class="menu" id="menu" hidden>
+    <div class="who" id="who"></div>
+    <div class="access" id="access" hidden></div>
+    <button data-view="favs">★ Миний жагсаалт</button>
+    <button id="menuPlans">Багц сонгох</button>
+    <button id="logoutBtn">Гарах</button>
+  </div>
+</header>
+
+<main class="wrap">
+  <div id="homeView">
+    <section class="hero" id="hero" aria-roledescription="carousel" aria-label="Онцлох">
+      <div id="slides"></div>
+      <button class="nav prev" id="hPrev" aria-label="Өмнөх">‹</button>
+      <button class="nav next" id="hNext" aria-label="Дараах">›</button>
+      <div class="dots" id="dots"></div>
+    </section>
+    <section class="cats" id="cats" aria-label="Ангилал"></section>
+    <div id="rows"></div>
+    <section class="promo" id="promo" hidden>
+      <svg class="pop" viewBox="0 0 64 64" aria-hidden="true"><path d="M14 26h36l-5 32H19z" fill="#e0123f"/><path d="M20 26l3 32M32 26v32M44 26l-3 32" stroke="#fff" stroke-width="4" opacity=".9"/><circle cx="20" cy="22" r="7" fill="#fff2d6"/><circle cx="30" cy="17" r="8" fill="#fff8e8"/><circle cx="41" cy="20" r="7" fill="#ffefcc"/><circle cx="47" cy="25" r="5" fill="#fff2d6"/><circle cx="16" cy="27" r="5" fill="#ffefcc"/><circle cx="35" cy="24" r="6" fill="#fff8e8"/></svg>
+      <div class="txt">
+        <h3><svg viewBox="0 0 24 24"><path d="M3 7l4.5 4L12 4l4.5 7L21 7l-2 12H5z"/></svg>Багцаар үзээд илүү олон киног хязгааргүй үзээрэй!</h3>
+        <ul><li>Шинэ кино, цуврал тогтмол нэмэгдэнэ</li><li>Өндөр чанар</li><li>Бүх төхөөрөмж дээр</li></ul>
+      </div>
+      <button class="btn primary" id="promoBtn">Багц сонгох</button>
+    </section>
+  </div>
+
+  <div id="browseView" hidden>
+    <div class="browse-head">
+      <h1 id="browseTitle">Бүх кино</h1>
+      <div class="ctl">
+        <span class="count" id="count"></span>
+        <select id="sort" aria-label="Эрэмбэлэх">
+          <option value="new">Шинэ нь эхэнд</option>
+          <option value="top">Их үзэлттэй</option>
+          <option value="title">Нэрээр (А–Я)</option>
+        </select>
+      </div>
+    </div>
+    <div class="chips" id="genres" role="group" aria-label="Ангилал"></div>
+    <div class="grid" id="grid"></div>
+  </div>
+</main>
+
+<nav class="mob" aria-label="Цэс">
+  <button data-view="home" aria-current="page"><svg viewBox="0 0 24 24"><path d="M3 11 12 4l9 7v9a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/></svg>Нүүр</button>
+  <button data-view="series"><svg viewBox="0 0 24 24"><rect x="3" y="6" width="18" height="13" rx="2"/><path d="m8 2 4 4 4-4"/></svg>Цуврал</button>
+  <button data-view="all"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>Ангилал</button>
+  <button data-view="top"><svg viewBox="0 0 24 24"><path d="m12 3 2.7 5.6 6.1.9-4.4 4.3 1 6.1L12 17l-5.4 2.9 1-6.1L3.2 9.5l6.1-.9z"/></svg>Топ</button>
+  <button data-view="favs"><svg viewBox="0 0 24 24"><path d="M12 21s-7.5-4.6-9.5-9.2C1 8.3 3.3 5 6.6 5c2 0 3.5 1.1 5.4 3 1.9-1.9 3.4-3 5.4-3C20.7 5 23 8.3 21.5 11.8 19.5 16.4 12 21 12 21z"/></svg>Жагсаалт</button>
+</nav>
+
+<footer>
+  <div class="wrap">
+    <div>
+      <img src="img/logo-header.png" alt="Kinooza" width="135" height="32">
+      <p style="margin-top:10px">Шинэ кино, цувралыг хаанаас ч, хэзээ ч.</p>
+    </div>
+    <div>
+      <h4>Үзэх</h4>
+      <p><a href="#" data-view="new">Шинээр нэмэгдсэн</a></p>
+      <p><a href="#" data-view="series">Цуврал</a></p>
+      <p><a href="#" data-view="top">Топ үзэлттэй</a></p>
+    </div>
+    <div>
+      <h4>Холбоо барих</h4>
+      <p><a id="fbLink" target="_blank" rel="noopener">Facebook пэйж</a></p>
+    </div>
+    <div class="fine">© <span id="yr">2026</span> Kinooza · <a href="privacy.html">Нууцлалын бодлого</a></div>
+  </div>
+</footer>
+
+<dialog id="movieDlg" aria-labelledby="dTitle">
+  <button class="close-x" data-close aria-label="Хаах">×</button>
+  <div id="movieBody"></div>
+</dialog>
+
+<dialog id="authDlg" aria-labelledby="aTitle">
+  <div class="auth">
+    <img class="logo" src="img/logo-header.png" alt="Kinooza">
+    <h2 id="aTitle">Нэвтрэх</h2>
+    <p class="note" id="authHint">Кино үзэхийн тулд нэвтэрнэ үү.</p>
+    <button class="btn wide" type="button" id="googleBtn">
+      <svg class="g-logo" viewBox="0 0 48 48" aria-hidden="true"><path fill="#FFC107" d="M43.6 20.5H42V20H24v8h11.3C33.7 32.7 29.2 36 24 36c-6.6 0-12-5.4-12-12s5.4-12 12-12c3.1 0 5.8 1.2 7.9 3.1l5.7-5.7C34 6.1 29.3 4 24 4 12.9 4 4 12.9 4 24s8.9 20 20 20 20-8.9 20-20c0-1.3-.1-2.4-.4-3.5z"/><path fill="#FF3D00" d="m6.3 14.7 6.6 4.8C14.7 15.1 19 12 24 12c3.1 0 5.8 1.2 7.9 3.1l5.7-5.7C34 6.1 29.3 4 24 4 16.3 4 9.7 8.3 6.3 14.7z"/><path fill="#4CAF50" d="M24 44c5.2 0 9.9-2 13.4-5.2l-6.2-5.2C29.2 35.1 26.7 36 24 36c-5.2 0-9.6-3.3-11.3-7.9l-6.5 5C9.5 39.6 16.2 44 24 44z"/><path fill="#1976D2" d="M43.6 20.5H42V20H24v8h11.3c-.8 2.2-2.2 4.2-4.1 5.6l6.2 5.2C37 39.2 44 34 44 24c0-1.3-.1-2.4-.4-3.5z"/></svg>
+      Google-ээр нэвтрэх
+    </button>
+    <div id="phoneBlock">
+      <div class="or">эсвэл утсаар</div>
+      <form id="phoneForm" novalidate style="margin-top:14px">
+        <label for="phone">Утасны дугаар
+          <span class="phone-row"><span class="cc">+976</span><input id="phone" type="tel" inputmode="numeric" autocomplete="tel-national" placeholder="9911 2233" maxlength="9"></span>
+        </label>
+        <div style="height:10px"></div>
+        <button class="btn primary wide" type="submit" id="sendCodeBtn">Код илгээх</button>
+      </form>
+      <form id="codeForm" novalidate hidden>
+        <label for="code">SMS-ээр ирсэн 6 оронтой код
+          <input id="code" type="text" inputmode="numeric" autocomplete="one-time-code" maxlength="6" placeholder="••••••">
+        </label>
+        <div style="height:10px"></div>
+        <div class="actions">
+          <button class="btn primary" type="submit">Баталгаажуулах</button>
+          <button class="btn ghost" type="button" id="changePhone">Дугаар солих</button>
+        </div>
+      </form>
+    </div>
+    <div class="msg" id="authMsg" role="status"></div>
+    <button class="btn ghost" type="button" data-close>Болих</button>
+  </div>
+</dialog>
+
+<dialog id="payDlg" aria-labelledby="pTitle">
+  <button class="close-x" data-close aria-label="Хаах">×</button>
+  <div class="pay" id="payBody"></div>
+</dialog>
+
+<script src="config.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
+<script>
+(() => {
+  const cfg = window.KINO_CONFIG || {};
+  let sb = null;
+  try { if (cfg.SUPABASE_URL && cfg.SUPABASE_ANON_KEY && window.supabase) sb = window.supabase.createClient(cfg.SUPABASE_URL, cfg.SUPABASE_ANON_KEY); } catch (e) { console.warn(e); }
+
+  // ---------- Meta Pixel (тохируулсан бол) ----------
+  const PIXEL = String(cfg.META_PIXEL_ID || "").trim();
+  if (/^\d{10,20}$/.test(PIXEL)) {
+    !function(f,b,e,v,n,t,s){if(f.fbq)return;n=f.fbq=function(){n.callMethod?n.callMethod.apply(n,arguments):n.queue.push(arguments)};if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';n.queue=[];t=b.createElement(e);t.async=!0;t.src=v;s=b.getElementsByTagName(e)[0];s.parentNode.insertBefore(t,s)}(window,document,'script','https://connect.facebook.net/en_US/fbevents.js');
+    fbq('init', PIXEL); fbq('track', 'PageView');
+  }
+  const track = (ev, data, opts) => { try { if (window.fbq && PIXEL) fbq('track', ev, data || {}, opts || {}); } catch {} };
+
+  const $ = (s) => document.querySelector(s);
+  const esc = (s) => String(s ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+  const store = {
+    get(k, d) { try { const v = localStorage.getItem(k); return v ? JSON.parse(v) : d; } catch { return d; } },
+    set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch {} }
+  };
+  const state = { movies: [], q: "", cat: "all", sort: store.get("kz.sort", "new"), view: "home", user: null, favs: new Set(), current: null, phone: "", pendingPlay: null, ents: [], progress: new Map(), plans: {}, pay: null, payTimer: null, hero: 0, heroTimer: null, kp: null, episodes: new Map() };
+
+  function toast(text) { const t = document.createElement("div"); t.className = "toast"; t.textContent = text; t.setAttribute("role", "status"); document.body.appendChild(t); setTimeout(() => t.remove(), 2400); }
+
+  // ---------- Ангилал ----------
+  const ICON = {
+    fire: '<path d="M12 3c1 3 4 4.5 4 8.5A4 4 0 0 1 8 12c0-1.5.6-2.6 1.5-3.5C9.6 11 11 11.5 11 11.5 10 8 12 5 12 3z"/><path d="M6 15a6 6 0 0 0 12 0"/>',
+    tv: '<rect x="3" y="6" width="18" height="13" rx="2"/><path d="m8 2 4 4 4-4"/>',
+    compass: '<circle cx="12" cy="12" r="9"/><path d="m15.5 8.5-2 5-5 2 2-5z"/>',
+    heart: '<path d="M12 21s-7.5-4.6-9.5-9.2C1 8.3 3.3 5 6.6 5c2 0 3.5 1.1 5.4 3 1.9-1.9 3.4-3 5.4-3C20.7 5 23 8.3 21.5 11.8 19.5 16.4 12 21 12 21z"/>',
+    mask: '<path d="M4 6c3 1 13 1 16 0v5a8 8 0 0 1-16 0z"/><path d="M9 11h.01M15 11h.01M9.5 15a3.5 3.5 0 0 0 5 0"/>',
+    ghost: '<path d="M6 20V10a6 6 0 0 1 12 0v10l-2-1.5-2 1.5-2-1.5-2 1.5-2-1.5z"/><path d="M10 10h.01M14 10h.01"/>',
+    lotus: '<path d="M12 20c-4 0-8-2-9-6 3 0 6 1 9 4 3-3 6-4 9-4-1 4-5 6-9 6z"/><path d="M12 18c-2-3-2-8 0-12 2 4 2 9 0 12z"/>',
+    grid: '<rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/>',
+  };
+  const CATS = [
+    { key: "new", label: "Шинээр нэмэгдсэн", icon: "fire", c: "#ff4d4d" },
+    { key: "series", label: "Цуврал", icon: "tv", c: "#3b82f6" },
+    { key: "Адал явдал", label: "Адал явдал", icon: "compass", c: "#a855f7" },
+    { key: "Романтик", label: "Романтик", icon: "heart", c: "#ec4899" },
+    { key: "Триллер", label: "Триллер", icon: "mask", c: "#8b5cf6" },
+    { key: "Аймшиг", label: "Аймшиг", icon: "ghost", c: "#94a3b8" },
+    { key: "Ази цуврал", label: "Ази цуврал", icon: "lotus", c: "#d946ef" },
+    { key: "all", label: "Бүх ангилал", icon: "grid", c: "#38bdf8" },
+  ];
+  const svg = (k) => `<svg viewBox="0 0 24 24" aria-hidden="true">${ICON[k]}</svg>`;
+  const tagsOf = (m) => [m.genre, ...(m.tags || [])].filter(Boolean);
+  const isNew = (m) => Date.now() - new Date(m.created_at || 0).getTime() < 21 * 864e5;
+  const norm = (v) => String(v || "").toLowerCase().replace(/ө/g, "о").replace(/ү/g, "у").replace(/ё/g, "е");
+  function matchCat(m, key) {
+    if (!key || key === "all") return true;
+    if (key === "new") return isNew(m);
+    if (key === "series") return m.kind === "series";
+    if (key === "movie") return m.kind !== "series";
+    return tagsOf(m).some((t) => norm(t) === norm(key));
+  }
+
+  // ---------- Карт ----------
+  const dur = (r) => { r = +r || 0; const h = Math.floor(r / 60), mm = r % 60; return h ? `${h} цаг${mm ? ` ${mm} мин` : ""}` : `${mm} мин`; };
+  const meta = (m) => [m.year, m.kind === "series" ? (m.ep_count ? `${m.ep_count} анги` : "Цуврал") : (m.runtime ? dur(m.runtime) : "")].filter(Boolean).join(" · ");
+  const playIc = '<svg viewBox="0 0 24 24"><path d="M7 4v16l13-8z"/></svg>';
+  function posterHTML(m, withBadges = true, priority = false) {
+    const badge = !withBadges ? "" : !m.has_video ? `<span class="badge soon">Удахгүй</span>` : isNew(m) ? `<span class="badge">Шинэ</span>` : "";
+    return `<div class="poster" style="--h1:${+m.hue1 || 340};--h2:${+m.hue2 || 260}">
+      <div class="p-title">${esc(m.title)}</div>
+      ${m.poster_url ? `<img src="${esc(m.poster_url)}" alt="" width="400" height="600" ${priority ? 'fetchpriority="high"' : 'loading="lazy"'} decoding="async" onerror="this.remove()">` : ""}
+      ${badge}
+      ${withBadges ? `<div class="play"><i>${playIc}</i></div>` : ""}
+      ${withBadges && meta(m) ? `<div class="info">${esc(meta(m))}</div>` : ""}
+    </div>`;
+  }
+  const cardHTML = (m) => `<button class="card" data-open="${m.id}" aria-label="${esc(m.title)}">${posterHTML(m)}<div class="name">${esc(m.title)}</div></button>`;
+  const topHTML = (m, i) => `<div class="topcard"><span class="num" aria-hidden="true">${i + 1}</span>${cardHTML(m)}</div>`;
+  const resumeHTML = (m) => {
+    const r = state.progress.get(m.id) || {};
+    const total = r.duration_sec || (m.runtime || 0) * 60;
+    const pct = total ? Math.min(100, Math.round((r.position_sec || 0) / total * 100)) : 0;
+    const ep = r.episode_id ? findEp(m.id, r.episode_id) : null;
+    return `<button class="card" data-resume="${m.id}" aria-label="${esc(m.title)} — үргэлжлүүлэх">${posterHTML(m)}<div class="prog"><i style="width:${pct}%"></i></div><div class="name">${esc(m.title)}</div><div class="left">${ep ? `${ep.season > 1 ? ep.season + "-р улирал, " : ""}${ep.number}-р анги` : total ? Math.max(1, Math.round((total - (r.position_sec || 0)) / 60)) + " мин үлдсэн" : ""}</div></button>`;
+  };
+
+  // ---------- Өгөгдөл ----------
+  async function loadMovies() {
+    if (!sb) return [];
+    const { data, error } = await sb.from("movies").select("*, episodes(count)").eq("published", true);
+    if (error) { console.warn(error.message); return []; }
+    return (data || []).map((m) => ({ ...m, ep_count: m.episodes?.[0]?.count || 0 }));
+  }
+  async function loadEpisodes(movieId) {
+    if (state.episodes.has(movieId)) return state.episodes.get(movieId);
+    const { data } = await sb.from("episodes").select("id,season,number,title,runtime").eq("movie_id", movieId).order("season").order("number");
+    state.episodes.set(movieId, data || []);
+    return data || [];
+  }
+  const findEp = (movieId, epId) => (state.episodes.get(movieId) || []).find((e) => e.id === epId) || null;
+  async function loadFavs() {
+    state.favs = new Set();
+    if (sb && state.user) { const { data } = await sb.from("favorites").select("movie_id"); state.favs = new Set((data || []).map((r) => r.movie_id)); }
+  }
+  async function toggleFav(id) {
+    if (!state.user) { openAuth("Жагсаалтдаа нэмэхийн тулд нэвтэрнэ үү."); return; }
+    const has = state.favs.has(id);
+    const { error } = has ? await sb.from("favorites").delete().eq("movie_id", id).eq("user_id", state.user.id) : await sb.from("favorites").insert({ movie_id: id, user_id: state.user.id });
+    if (error) { toast("Хадгалж чадсангүй"); return; }
+    has ? state.favs.delete(id) : state.favs.add(id);
+    toast(has ? "Жагсаалтаас хасагдлаа" : "Миний жагсаалтад нэмэгдлээ");
+    render(); if (state.current?.id === id && !state.kp) openMovie(id);
+  }
+
+  // ---------- Харуулах ----------
+  const byNew = (a, b) => new Date(b.created_at) - new Date(a.created_at) || b.id - a.id;
+  const byTop = (a, b) => (b.views || 0) - (a.views || 0) || byNew(a, b);
+  function heroItems() {
+    return [...state.movies].filter((m) => m.backdrop_url || m.poster_url).sort((a, b) => (b.featured === true) - (a.featured === true) || byNew(a, b)).slice(0, 6);
+  }
+  function renderHero() {
+    const items = heroItems();
+    $("#hero").hidden = !items.length;
+    if (!items.length) return;
+    if (state.hero >= items.length) state.hero = 0;
+    $("#slides").innerHTML = items.map((m, i) => {
+      const on = i === state.hero, ti = on ? 0 : -1;
+      const bg = m.backdrop_url ? `<div class="bg" style="background-image:url('${esc(m.backdrop_url)}')"></div>`
+        : `<div class="bg blur" style="background-image:url('${esc(m.poster_url)}')"></div><img class="art" src="${esc(m.poster_url)}" alt="" ${i ? 'loading="lazy"' : 'fetchpriority="high"'}>`;
+      return `<div class="slide${on ? " on" : ""}" data-open="${m.id}" aria-hidden="${!on}">${bg}
+        <div class="cap">
+          <h2>${esc(m.title)}</h2>
+          <div class="chips-mini">${tagsOf(m).slice(0, 3).map((t) => `<span>${esc(t)}</span>`).join("")}${m.age_rating ? `<span>${esc(m.age_rating)}</span>` : ""}</div>
+          <div class="go">
+            ${m.has_video ? `<button class="btn primary" data-play="${m.id}" tabindex="${ti}">${playIc.replace("<svg", '<svg fill="currentColor"')} Одоо үзэх</button>` : ""}
+            <button class="btn glass" data-open="${m.id}" tabindex="${ti}">ⓘ Дэлгэрэнгүй</button>
+          </div>
+        </div></div>`;
+    }).join("");
+    $("#dots").innerHTML = items.length > 1 ? items.map((_, i) => `<button data-dot="${i}" aria-label="${i + 1}-р слайд" aria-current="${i === state.hero}"></button>`).join("") : "";
+    $("#hPrev").hidden = $("#hNext").hidden = items.length < 2;
+  }
+  function showSlide(i) {
+    const n = heroItems().length; if (!n) return;
+    state.hero = (i + n) % n;
+    document.querySelectorAll("#slides .slide").forEach((s, k) => { const on = k === state.hero; s.classList.toggle("on", on); s.setAttribute("aria-hidden", !on); s.querySelectorAll("button").forEach((b) => (b.tabIndex = on ? 0 : -1)); });
+    document.querySelectorAll("#dots button").forEach((d, k) => d.setAttribute("aria-current", k === state.hero));
+  }
+  function startHero() { clearInterval(state.heroTimer); if (matchMedia("(prefers-reduced-motion: reduce)").matches) return; state.heroTimer = setInterval(() => { if (!document.hidden && state.view === "home") showSlide(state.hero + 1); }, 6500); }
+
+  function renderCats() {
+    $("#cats").innerHTML = CATS.map((c) => `<button class="cat" data-cat="${esc(c.key)}" style="--c:${c.c}"><span class="ic" style="background:${c.c}22">${svg(c.icon)}</span>${esc(c.label)}</button>`).join("");
+    $("#catMenu").innerHTML = CATS.map((c) => `<button data-cat="${esc(c.key)}">${esc(c.label)}</button>`).join("");
+  }
+  function rowHTML(title, list, more, kind = "") {
+    if (!list.length) return "";
+    const items = kind === "top" ? list.map(topHTML) : kind === "resume" ? list.map(resumeHTML) : list.map(cardHTML);
+    return `<section class="row"><div class="row-head"><h3>${esc(title)}</h3>${more ? `<button data-more="${esc(more)}">Бүгдийг үзэх ›</button>` : ""}</div>
+      <div class="track-wrap"><button class="arrow l" data-scroll="-1" aria-label="Зүүн">‹</button><div class="track${kind === "top" ? " top" : ""}">${items.join("")}</div><button class="arrow r" data-scroll="1" aria-label="Баруун">›</button></div></section>`;
+  }
+  function renderRows() {
+    $("#homeView").appendChild($("#promo")); // дахин зурахад баннер устахгүй
+    const all = state.movies;
+    const cont = [...state.progress.values()].map((r) => all.find((m) => m.id === r.movie_id)).filter((m) => m && m.has_video);
+    let html = cont.length ? rowHTML("Үргэлжлүүлж үзэх", cont, null, "resume") : "";
+    html += rowHTML("Шинээр нэмэгдсэн", [...all].sort(byNew).slice(0, 20), "new");
+    const top = [...all].filter((m) => m.views > 0).sort(byTop).slice(0, 10);
+    html += rowHTML("Топ үзэлттэй", top.length >= 3 ? top : [...all].sort(byTop).slice(0, 10), "top", "top");
+    html += '<div id="promoSlot"></div>';
+    html += rowHTML("Цуврал", all.filter((m) => m.kind === "series").sort(byNew), "series");
+    if (state.user && state.favs.size) html += rowHTML("Миний жагсаалт", all.filter((m) => state.favs.has(m.id)), "favs");
+    CATS.filter((c) => !["new", "series", "all"].includes(c.key)).forEach((c) => {
+      const l = all.filter((m) => matchCat(m, c.key)); if (l.length >= 3) html += rowHTML(c.label, l.sort(byNew), "cat:" + c.key);
+    });
+    $("#rows").innerHTML = html || `<div class="empty" style="margin-top:30px">Удахгүй шинэ кино, цуврал нэмэгдэнэ.</div>`;
+    const promo = $("#promo"); promo.hidden = !subPlans().length;
+    const slot = $("#promoSlot"); if (slot) slot.replaceWith(promo);
+  }
+  const VIEWS = { all: "Бүх кино", new: "Шинээр нэмэгдсэн", series: "Цуврал", top: "Топ үзэлттэй", favs: "Миний жагсаалт" };
+  function visible() {
+    const q = norm(state.q.trim());
+    let list = state.movies.filter((m) =>
+      (state.view !== "favs" || state.favs.has(m.id)) &&
+      (state.view !== "new" || isNew(m) || true) &&
+      (state.view !== "series" || m.kind === "series") &&
+      matchCat(m, state.cat) &&
+      (!q || [m.title, m.genre, ...(m.tags || []), m.description].some((v) => norm(v).includes(q))));
+    const sort = state.view === "top" ? "top" : state.view === "new" ? "new" : state.sort;
+    return list.sort({ new: byNew, top: byTop, title: (a, b) => a.title.localeCompare(b.title, "mn") }[sort] || byNew);
+  }
+  function renderBrowse() {
+    const catLabel = CATS.find((c) => c.key === state.cat && !["all"].includes(c.key))?.label;
+    $("#browseTitle").textContent = state.q.trim() ? `“${state.q.trim()}” хайлт` : catLabel && state.view === "all" ? catLabel : VIEWS[state.view] || "Бүх кино";
+    const chips = [{ key: "all", label: "Бүгд" }, { key: "movie", label: "Кино" }, ...CATS.filter((c) => !["all", "new"].includes(c.key))];
+    $("#genres").innerHTML = chips.map((c) => `<button class="chip" data-chip="${esc(c.key)}" aria-pressed="${c.key === state.cat}">${esc(c.label)}</button>`).join("");
+    const list = visible();
+    $("#count").textContent = `${list.length} гарчиг`;
+    $("#grid").innerHTML = list.length ? list.map(cardHTML).join("") : `<div class="empty">${state.view === "favs" ? "Жагсаалт хоосон байна. Кино нээгээд ☆ товчийг дарна уу." : "Тохирох кино олдсонгүй."}</div>`;
+  }
+  function render() {
+    const home = state.view === "home" && !state.q.trim();
+    $("#homeView").hidden = !home; $("#browseView").hidden = home;
+    const cur = home ? "home" : state.view;
+    document.querySelectorAll("nav [data-view]").forEach((b) => b.dataset.view === cur ? b.setAttribute("aria-current", "page") : b.removeAttribute("aria-current"));
+    if (home) { renderHero(); renderRows(); } else renderBrowse();
+    renderUser();
+  }
+  function setView(v, cat) {
+    if (v === "favs" && !state.user) { openAuth("Жагсаалтаа харахын тулд нэвтэрнэ үү."); return; }
+    state.view = v; state.cat = cat || "all";
+    if (v === "home") { state.q = ""; $("#q").value = ""; }
+    $("#menu").hidden = true; $("#catMenu").hidden = true;
+    render(); scrollTo({ top: 0, behavior: "smooth" });
+  }
+  function openCat(key) {
+    if (key === "new") return setView("new");
+    if (key === "series") return setView("series");
+    setView("all", key);
+  }
+
+  // ---------- Дэлгэрэнгүй ----------
+  async function openMovie(id, playing = null) {
+    const m = state.movies.find((x) => x.id === id); if (!m) return;
+    if (!playing) track("ViewContent", { content_ids: [String(m.id)], content_name: m.title, content_type: "product" });
+    state.current = m;
+    const eps = m.kind === "series" ? await loadEpisodes(m.id) : [];
+    const pr = state.progress.get(m.id);
+    const seasons = [...new Set(eps.map((e) => e.season))];
+    const curEp = playing?.episode || (pr?.episode_id ? eps.find((e) => e.id === pr.episode_id) : null);
+    const selSeason = state.season && seasons.includes(state.season) && state.current?.id === id ? state.season : (curEp?.season || seasons[0] || 1);
+    state.season = selSeason;
+    const firstEp = eps[0];
+    const resumeAt = pr && pr.position_sec > 20 ? pr.position_sec : 0;
+    let mainBtn = "";
+    if (!m.has_video) mainBtn = `<button class="btn primary" disabled>Удахгүй нэмэгдэнэ</button>`;
+    else if (m.kind === "series") {
+      const ep = curEp || firstEp;
+      if (ep) mainBtn = `<button class="btn primary" data-playep="${ep.id}">${playIc.replace("<svg", '<svg fill="currentColor"')} ${curEp ? "Үргэлжлүүлэх" : "Үзэх"} · ${ep.season > 1 ? ep.season + "-р улирал, " : ""}${ep.number}-р анги</button>`;
+    } else mainBtn = `<button class="btn primary" data-play="${m.id}">${playIc.replace("<svg", '<svg fill="currentColor"')} ${resumeAt ? "Үргэлжлүүлэх · " + clock(resumeAt) : "Одоо үзэх"}</button>`;
+    const epList = eps.filter((e) => e.season === selSeason).map((e) => {
+      const isCur = playing?.episode?.id === e.id, seen = pr?.episode_id === e.id;
+      return `<button class="ep${isCur ? " cur" : ""}" data-playep="${e.id}"><span class="n">${e.number}</span><span style="min-width:0"><span class="t">${esc(e.title || `${e.number}-р анги`)}</span><span class="s">${e.runtime ? dur(e.runtime) : ""}</span></span><span class="r${seen ? " pg" : ""}">${isCur ? "Тоглож байна" : seen ? "Үргэлжлүүлэх" : "▶"}</span></button>`;
+    }).join("");
+    $("#movieBody").innerHTML = `
+      ${playing ? `<div class="player" id="playerBox"></div>
+        <div class="now-playing"><span><b>${esc(m.title)}</b>${playing.episode ? ` · ${playing.episode.season > 1 ? playing.episode.season + "-р улирал, " : ""}${playing.episode.number}-р анги` : ""}</span>
+        ${playing.next ? `<button class="btn" data-playep="${playing.next.id}">Дараагийн анги ›</button>` : ""}</div>`
+        : `<div class="d-hero" style="${m.backdrop_url || m.poster_url ? `background-image:url('${esc(m.backdrop_url || m.poster_url)}')` : ""}"></div>`}
+      ${playing ? "" : `<div class="d-head">${posterHTML(m, false)}<div style="min-width:0">
+          <h2 id="dTitle">${esc(m.title)}</h2>
+          <div class="facts">${[m.year, m.kind === "series" ? `${eps.length} анги` : m.runtime ? dur(m.runtime) : "", m.age_rating, ...tagsOf(m)].filter(Boolean).map((t) => `<span>${esc(t)}</span>`).join("")}</div>
+        </div></div>`}
+      <div class="d-body">
+        ${playing ? `<h2 id="dTitle" class="sec-title">${esc(m.title)}</h2>` : ""}
+        ${m.description ? `<p>${esc(m.description)}</p>` : ""}
+        <div class="actions">${playing ? "" : mainBtn}<button class="btn" data-fav="${m.id}">${state.favs.has(m.id) ? "★ Жагсаалтаас хасах" : "☆ Миний жагсаалтад"}</button></div>
+        ${m.kind === "series" ? `<div style="display:grid;gap:12px">
+          <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap"><h3 class="sec-title">Ангиуд</h3>
+          ${seasons.length > 1 ? `<div class="seasons">${seasons.map((s) => `<button class="chip" data-season="${s}" aria-pressed="${s === selSeason}">${s}-р улирал</button>`).join("")}</div>` : ""}</div>
+          <div class="eps">${epList || `<p class="note">Анги удахгүй нэмэгдэнэ.</p>`}</div></div>` : ""}
+      </div>`;
+    const dlg = $("#movieDlg");
+    if (!dlg.open) dlg.showModal();
+    if (playing) mountPlayer(m, playing);
+    else dlg.scrollTop = 0;
+  }
+
+  // ---------- Тоглуулагч ----------
+  const clock = (t) => { t = Math.floor(t); const h = Math.floor(t / 3600), mm = Math.floor(t % 3600 / 60), ss = t % 60; return (h ? h + ":" + String(mm).padStart(2, "0") : mm) + ":" + String(ss).padStart(2, "0"); };
+  function embedUrl(raw) {
+    let u; try { u = new URL(raw); } catch { return ""; }
+    const h = u.hostname.replace(/^www\./, ""), parts = u.pathname.split("/").filter(Boolean);
+    if (h === "vimeo.com" && /^\d+$/.test(parts[0] || "")) return `https://player.vimeo.com/video/${parts[0]}${parts[1] ? "?h=" + parts[1] : ""}`;
+    if (h === "kinescope.io") return parts[0] === "embed" ? u.href : `https://kinescope.io/embed/${parts[parts.length - 1]}`;
+    if (h === "iframe.mediadelivery.net" || h === "player.mediadelivery.net") return parts[0] === "play" ? `https://iframe.mediadelivery.net/embed/${parts[1]}/${parts[2]}` : u.href;
+    return u.protocol === "https:" ? u.href : "";
+  }
+  async function loadProgress() {
+    state.progress = new Map();
+    if (!sb || !state.user) return;
+    const { data } = await sb.from("watch_progress").select("movie_id,episode_id,position_sec,duration_sec,updated_at").order("updated_at", { ascending: false }).limit(30);
+    (data || []).forEach((r) => state.progress.set(r.movie_id, r));
+    // Цувралын ангийн нэрийг харуулахын тулд ангиудыг урьдчилж ачаална
+    await Promise.all([...new Set((data || []).filter((r) => r.episode_id).map((r) => r.movie_id))].map(loadEpisodes));
+  }
+  async function saveProgress(movieId, episodeId, pos, durSec, isLastEp = true) {
+    if (!sb || !state.user || !(pos >= 0)) return;
+    pos = Math.floor(pos); durSec = durSec > 0 ? Math.floor(durSec) : null;
+    if (durSec && pos > durSec - 90) {
+      if (episodeId && !isLastEp) return; // цувралын дараагийн ангид шилжинэ
+      state.progress.delete(movieId);
+      await sb.from("watch_progress").delete().eq("user_id", state.user.id).eq("movie_id", movieId);
+      return;
+    }
+    if (pos < 15) return;
+    const row = { user_id: state.user.id, movie_id: movieId, episode_id: episodeId || null, position_sec: pos, duration_sec: durSec, updated_at: new Date().toISOString() };
+    state.progress.set(movieId, row);
+    await sb.from("watch_progress").upsert(row);
+  }
+  const watermarkText = () => { const u = state.user; if (!u) return ""; if (u.phone) return "+" + String(u.phone).replace(/^(\d{3})(\d{2})\d{4}(\d{2})$/, "$1 $2••••$3"); return String(u.email || "").replace(/^(.{2}).*(@.*)$/, "$1•••$2"); };
+  let kinescopeApi = null;
+  function loadKinescopeApi() {
+    if (kinescopeApi) return kinescopeApi;
+    kinescopeApi = new Promise((resolve, reject) => {
+      window.onKinescopeIframeAPIReady = (factory) => resolve(factory);
+      const sc = document.createElement("script"); sc.src = "https://player.kinescope.io/latest/iframe.player.js"; sc.async = true;
+      sc.onerror = () => { kinescopeApi = null; reject(new Error("kinescope api")); };
+      document.head.appendChild(sc); setTimeout(() => reject(new Error("timeout")), 8000);
+    });
+    return kinescopeApi;
+  }
+  const withParams = (url, params) => { const u = new URL(url); Object.entries(params).forEach(([k, v]) => { if (v !== "" && v != null) u.searchParams.set(k, v); }); return u.href; };
+  async function mountPlayer(m, playing) {
+    const box = $("#playerBox"); if (!box) return;
+    const src = embedUrl(playing.url); if (!src) { box.innerHTML = ""; toast("Видеоны холбоос буруу байна"); return; }
+    const epId = playing.episode?.id || null;
+    const pr = state.progress.get(m.id);
+    const start = pr && pr.position_sec > 20 && (pr.episode_id || null) === epId ? pr.position_sec : 0;
+    const wm = watermarkText();
+    const isK = /(^|\.)kinescope\.io$/.test(new URL(src).hostname);
+    const isLast = !playing.next;
+    const fallback = () => { box.innerHTML = `<iframe src="${esc(withParams(src, isK ? { t: start || "", watermark: wm } : {}))}" title="${esc(m.title)}" allow="autoplay; fullscreen; picture-in-picture; encrypted-media; screen-wake-lock" allowfullscreen></iframe>`; };
+    if (!isK) { fallback(); return; }
+    try {
+      const factory = await loadKinescopeApi();
+      if (!document.getElementById("playerBox")) return;
+      box.innerHTML = `<div id="kp"></div>`;
+      const player = await factory.create("kp", { url: src, size: { width: "100%", height: "100%" }, behavior: { autoPlay: true, localStorage: false }, ui: wm ? { watermark: { text: wm, mode: "random", scale: 0.6 } } : {} });
+      const k = state.kp = { player, movieId: m.id, epId, last: 0, dur: 0, pos: 0, isLast };
+      const E = player.Events || {};
+      let seeked = false;
+      player.on(E.Loaded || "loaded", async () => { if (seeked) return; seeked = true; try { k.dur = await player.getDuration(); } catch {} if (start && (!k.dur || start < k.dur - 60)) { try { await player.seekTo(start); } catch {} } });
+      player.on(E.TimeUpdate || "timeupdate", (ev) => { const t = ev?.data?.currentTime; if (!(t >= 0)) return; k.pos = t; if (Date.now() - k.last > 15000) { k.last = Date.now(); saveProgress(m.id, epId, t, k.dur, isLast); } });
+      player.on(E.Pause || "pause", () => { if (k.pos) saveProgress(m.id, epId, k.pos, k.dur, isLast); });
+      player.on(E.Ended || "ended", () => { saveProgress(m.id, epId, k.dur || 1e9, k.dur || 1, isLast); if (playing.next) playEpisode(playing.next.id); });
+    } catch (e) { console.warn("Kinescope API ачаалагдсангүй", e); fallback(); }
+  }
+  async function stopPlayer() {
+    const k = state.kp; state.kp = null; if (!k) return;
+    try { const t = await k.player.getCurrentTime(); if (t > 0) await saveProgress(k.movieId, k.epId, t, k.dur, k.isLast); } catch {}
+    try { k.player.destroy?.(); } catch {}
+    if (state.view === "home") renderRows();
+  }
+
+  async function play(id) {
+    const m = state.movies.find((x) => x.id === id); if (!m || !m.has_video) return;
+    if (m.kind === "series") {
+      const eps = await loadEpisodes(id); const pr = state.progress.get(id);
+      const ep = (pr?.episode_id && eps.find((e) => e.id === pr.episode_id)) || eps[0];
+      if (ep) return playEpisode(ep.id, id);
+      return openMovie(id);
+    }
+    if (!state.user) { state.pendingPlay = { id }; openAuth("Кино үзэхийн тулд нэвтэрнэ үү."); return; }
+    const { data } = await sb.from("movie_videos").select("video_url").eq("movie_id", id).maybeSingle();
+    if (!data?.video_url) return openPaywall(m);
+    sb.rpc("record_view", { p_movie: id });
+    await stopPlayer();
+    openMovie(id, { url: data.video_url });
+  }
+  async function playEpisode(epId, movieIdHint) {
+    const movieId = movieIdHint || state.current?.id;
+    const m = state.movies.find((x) => x.id === movieId); if (!m) return;
+    if (!state.user) { state.pendingPlay = { id: movieId, ep: epId }; openAuth("Үзэхийн тулд нэвтэрнэ үү."); return; }
+    const eps = await loadEpisodes(movieId);
+    const i = eps.findIndex((e) => e.id === epId); if (i < 0) return;
+    const { data } = await sb.from("episode_videos").select("video_url").eq("episode_id", epId).maybeSingle();
+    if (!data?.video_url) {
+      if (hasAccess(movieId) || state.isAdmin) { toast("Энэ ангийн видео удахгүй нэмэгдэнэ"); return; }
+      return openPaywall(m);
+    }
+    sb.rpc("record_view", { p_movie: movieId });
+    await stopPlayer();
+    state.season = eps[i].season;
+    openMovie(movieId, { url: data.video_url, episode: eps[i], next: eps[i + 1] || null });
+  }
+
+  // ---------- Эрх, багц ----------
+  const fmt = (n) => Number(n).toLocaleString("mn-MN").replace(/ /g, ",") + "₮";
+  const hasAccess = (movieId) => state.ents.some((e) => new Date(e.expires_at).getTime() > Date.now() && (e.movie_id == null || e.movie_id === movieId));
+  async function loadAccess() {
+    state.ents = []; state.isAdmin = false;
+    if (sb && state.user) {
+      const [{ data }, adm] = await Promise.all([sb.from("entitlements").select("movie_id,expires_at").gt("expires_at", new Date().toISOString()), sb.rpc("is_admin")]);
+      state.ents = data || []; state.isAdmin = adm?.data === true;
+    }
+    const sub = state.ents.filter((e) => e.movie_id == null).sort((a, b) => b.expires_at.localeCompare(a.expires_at))[0];
+    $("#access").hidden = !sub && !state.isAdmin;
+    $("#access").textContent = state.isAdmin ? "Админ" : sub ? "Багц: " + new Date(sub.expires_at).toLocaleDateString("mn-MN") + " хүртэл" : "";
+  }
+  async function loadPlans() {
+    if (!sb) return;
+    const { data } = await sb.from("plans").select("code,title,amount,old_amount,hours,kind,sort,badge,description").eq("active", true);
+    state.plans = {}; (data || []).forEach((p) => { state.plans[p.code] = p; });
+  }
+  const subPlans = () => Object.values(state.plans).filter((p) => p.kind !== "rent").sort((a, b) => (a.sort ?? 0) - (b.sort ?? 0) || a.amount - b.amount);
+  const rentPlan = () => Object.values(state.plans).find((p) => p.kind === "rent");
+  const PAY = !!cfg.PAYMENTS_ENABLED;
+  const planBtn = (p, movieId, title, price, sub) => `<button class="plan${p.badge ? " best" : ""}" data-buy="${esc(p.code)}" data-movie="${movieId ?? ""}" ${PAY ? "" : "disabled"}>
+      <b>${esc(title || p.title)}${p.badge ? ` <span class="pbadge">${esc(p.badge)}</span>` : ""}</b>
+      <span class="price">${p.old_amount && !title ? `<s>${fmt(p.old_amount)}</s>` : ""}${fmt(price || p.amount)}</span>
+      <small>${esc(sub || p.description || `Бүх кино, цуврал · ${Math.round(p.hours / 24)} хоног`)}</small></button>`;
+  const soonNote = PAY ? "" : `<div class="soon-box">Төлбөрийн систем удахгүй нээгдэнэ. Тун удахгүй QPay-ээр төлөөд үзэх боломжтой болно.</div>`;
+  function openPaywall(m) {
+    stopPolling();
+    const rent = rentPlan(), rentPrice = m.rent_price || rent?.amount;
+    $("#payBody").innerHTML = `<h2 id="pTitle">${esc(m.title)} үзэх</h2>
+      <p class="note">${m.kind === "series" ? "Бүх ангийг үзэхийн тулд багц эсвэл түрээс сонгоно уу." : "Багц эсвэл түрээс сонгоно уу."}</p>
+      ${soonNote}
+      ${rent && rentPrice ? planBtn(rent, m.id, m.kind === "series" ? "Зөвхөн энэ цуврал" : "Зөвхөн энэ кино", rentPrice, `${rent.hours} цагийн турш үзнэ`) : ""}
+      ${subPlans().map((p) => planBtn(p, m.id)).join("")}
+      <div class="msg" id="payMsg" role="status"></div>`;
+    if ($("#movieDlg").open) $("#movieDlg").close();
+    if (!$("#payDlg").open) $("#payDlg").showModal();
+  }
+  function openSubPaywall() {
+    $("#menu").hidden = true;
+    if (PAY && !state.user) { openAuth("Багц авахын тулд эхлээд нэвтэрнэ үү."); return; }
+    stopPolling();
+    $("#payBody").innerHTML = `<h2 id="pTitle">Багц сонгох</h2><p class="note">Бүх кино, цувралыг хязгааргүй үзнэ.</p>${soonNote}
+      ${subPlans().map((p) => planBtn(p, null)).join("") || `<p class="note">Одоогоор идэвхтэй багц алга.</p>`}<div class="msg" id="payMsg" role="status"></div>`;
+    if (!$("#payDlg").open) $("#payDlg").showModal();
+  }
+  async function buy(plan, movieId) {
+    if (!PAY) return;
+    const msg = $("#payMsg"); msg.className = "msg"; msg.textContent = "Нэхэмжлэх үүсгэж байна…";
+    document.querySelectorAll("[data-buy]").forEach((b) => (b.disabled = true));
+    const pl = state.plans[plan] || {};
+    track("InitiateCheckout", { content_ids: [pl.kind === "rent" ? String(movieId) : plan], value: Number(pl.amount) || 0, currency: "MNT" });
+    const { data, error } = await sb.functions.invoke("qpay", { body: { action: "create", plan, movie_id: movieId } });
+    if (error || !data?.payment_id) {
+      let text = error?.message || "Алдаа гарлаа"; try { const j = await error.context.json(); if (j?.error) text = j.error; } catch {}
+      msg.className = "msg err"; msg.textContent = "Нэхэмжлэх үүсгэж чадсангүй: " + text;
+      document.querySelectorAll("[data-buy]").forEach((b) => (b.disabled = false)); return;
+    }
+    $("#payBody").innerHTML = `<h2 id="pTitle">QPay-ээр төлөх · ${fmt(data.amount)}</h2><p class="note">${esc(data.description)}</p>
+      <div style="display:grid;justify-items:center;gap:10px">${data.qr_image ? `<img src="data:image/png;base64,${data.qr_image}" alt="QPay QR" style="width:min(240px,100%);background:#fff;border-radius:12px;padding:10px">` : ""}<span class="note">Банкны апп-аараа QR кодыг уншуулна уу</span></div>
+      ${data.urls?.length ? `<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(64px,1fr));gap:10px">${data.urls.map((u) => `<a href="${esc(u.link)}" style="display:grid;justify-items:center;gap:4px;text-decoration:none;color:var(--muted);font-size:10px;text-align:center"><img src="${esc(u.logo)}" alt="" loading="lazy" style="width:44px;height:44px;border-radius:10px;background:#fff">${esc(u.name)}</a>`).join("")}</div>` : ""}
+      <div class="note" id="payState">Төлбөр хүлээж байна…</div><button class="btn primary wide" id="checkPay">Төлсөн — шалгах</button>`;
+    state.pay = { id: data.payment_id, movieId, plan, amount: data.amount, until: Date.now() + 6e5 };
+    $("#checkPay").addEventListener("click", () => checkPay(true));
+    state.payTimer = setInterval(() => checkPay(false), 3000);
+  }
+  async function checkPay(manual) {
+    const p = state.pay; if (!p) return;
+    if (Date.now() > p.until) { stopPolling(); $("#payState").textContent = "Хугацаа дууслаа. Дахин оролдоно уу."; return; }
+    let paid = false;
+    if (manual) { const { data } = await sb.functions.invoke("qpay", { body: { action: "check", payment_id: p.id } }); paid = data?.status === "paid"; if (!paid) $("#payState").textContent = "Төлбөр хараахан ороогүй байна."; }
+    else { const { data } = await sb.from("payments").select("status").eq("id", p.id).maybeSingle(); paid = data?.status === "paid"; }
+    if (paid) { stopPolling(); $("#payDlg").close(); toast("Төлбөр амжилттай. Сайхан үзээрэй!"); track("Purchase", { value: Number(p.amount) || 0, currency: "MNT" }, { eventID: p.id }); await loadAccess(); if (p.movieId) play(p.movieId); }
+  }
+  function stopPolling() { clearInterval(state.payTimer); state.payTimer = null; }
+
+  // ---------- Нэвтрэлт ----------
+  const PHONE = !!cfg.PHONE_LOGIN;
+  $("#phoneBlock").hidden = !PHONE;
+  function authMsg(text, kind = "") { const m = $("#authMsg"); m.textContent = text; m.className = "msg " + kind; }
+  function openAuth(hint) {
+    authMsg(""); $("#phoneForm").hidden = false; $("#codeForm").hidden = true;
+    $("#authHint").textContent = hint || "Кино үзэхийн тулд нэвтэрнэ үү.";
+    if ($("#movieDlg").open) $("#movieDlg").close();
+    $("#authDlg").showModal();
+  }
+  $("#googleBtn").addEventListener("click", async () => {
+    if (!sb) return; authMsg("Google руу шилжиж байна…");
+    const { error } = await sb.auth.signInWithOAuth({ provider: "google", options: { redirectTo: location.origin + location.pathname } });
+    if (error) authMsg(error.message, "err");
+  });
+  $("#phoneForm").addEventListener("submit", async (e) => {
+    e.preventDefault(); const digits = $("#phone").value.replace(/\D/g, "");
+    if (!/^[6-9]\d{7}$/.test(digits)) { authMsg("8 оронтой утасны дугаараа оруулна уу.", "err"); return; }
+    state.phone = "+976" + digits; $("#sendCodeBtn").disabled = true; authMsg("Код илгээж байна…");
+    const { error } = await sb.auth.signInWithOtp({ phone: state.phone }); $("#sendCodeBtn").disabled = false;
+    if (error) { authMsg("Код илгээж чадсангүй: " + error.message, "err"); return; }
+    $("#phoneForm").hidden = true; $("#codeForm").hidden = false; $("#code").focus(); authMsg(`${state.phone} дугаарт код илгээлээ.`, "ok");
+  });
+  $("#codeForm").addEventListener("submit", async (e) => {
+    e.preventDefault(); const token = $("#code").value.replace(/\D/g, "");
+    if (token.length !== 6) { authMsg("6 оронтой кодоо оруулна уу.", "err"); return; }
+    const { error } = await sb.auth.verifyOtp({ phone: state.phone, token, type: "sms" });
+    if (error) { authMsg("Код буруу эсвэл хугацаа нь дууссан.", "err"); return; }
+    $("#authDlg").close(); toast("Нэвтэрлээ"); track("CompleteRegistration", { method: "phone" });
+  });
+  $("#changePhone").addEventListener("click", () => { $("#phoneForm").hidden = false; $("#codeForm").hidden = true; authMsg(""); });
+
+  function renderUser() {
+    const u = state.user, ub = $("#userBtn");
+    ub.classList.toggle("on", !!u);
+    ub.setAttribute("aria-label", u ? "Миний бүртгэл" : "Нэвтрэх");
+    const label = u ? (u.email || (u.phone ? "+" + u.phone : "")) : "";
+    ub.innerHTML = u ? esc((u.user_metadata?.full_name || label || "?").trim().charAt(0).toUpperCase()) : '<svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21c1.5-4 4.5-6 8-6s6.5 2 8 6"/></svg>';
+    $("#who").textContent = label;
+  }
+  async function onUser(user) {
+    state.user = user;
+    await Promise.all([loadFavs(), loadAccess(), loadProgress()]);
+    render();
+    if (user && state.pendingPlay) { const p = state.pendingPlay; state.pendingPlay = null; p.ep ? playEpisode(p.ep, p.id) : play(p.id); }
+  }
+
+  // ---------- Үйлдлүүд ----------
+  document.addEventListener("click", (e) => {
+    if (!$("#menu").hidden && !e.target.closest("#menu, #userBtn")) $("#menu").hidden = true;
+    if (!$("#catMenu").hidden && !e.target.closest("#catMenu, #catBtn")) $("#catMenu").hidden = true;
+    const t = (s) => e.target.closest(s);
+    let el;
+    if ((el = t("[data-buy]"))) { if (!el.disabled) buy(el.dataset.buy, el.dataset.movie ? +el.dataset.movie : null); return; }
+    if ((el = t("[data-playep]"))) { playEpisode(+el.dataset.playep); return; }
+    if ((el = t("[data-play]"))) { if (!el.disabled) play(+el.dataset.play); return; }
+    if ((el = t("[data-resume]"))) { play(+el.dataset.resume); return; }
+    if ((el = t("[data-open]"))) { e.preventDefault(); openMovie(+el.dataset.open); return; }
+    if ((el = t("[data-fav]"))) { toggleFav(+el.dataset.fav); return; }
+    if ((el = t("[data-season]"))) { state.season = +el.dataset.season; openMovie(state.current.id); return; }
+    if ((el = t("[data-cat]"))) { openCat(el.dataset.cat); return; }
+    if ((el = t("[data-chip]"))) { state.cat = el.dataset.chip; if (state.view === "home" || state.view === "new" || state.view === "top") state.view = "all"; render(); return; }
+    if ((el = t("[data-view]"))) { e.preventDefault(); setView(el.dataset.view); return; }
+    if ((el = t("[data-more]"))) { const [v, c] = el.dataset.more.split(":"); v === "cat" ? openCat(c) : setView(v); return; }
+    if ((el = t("[data-dot]"))) { showSlide(+el.dataset.dot); startHero(); return; }
+    if ((el = t("[data-scroll]"))) { const tr = el.parentElement.querySelector(".track"); tr.scrollBy({ left: +el.dataset.scroll * tr.clientWidth * 0.85, behavior: "smooth" }); return; }
+    if ((el = t("[data-close]"))) el.closest("dialog").close();
+  });
+  $("#hPrev").addEventListener("click", (e) => { e.stopPropagation(); showSlide(state.hero - 1); startHero(); });
+  $("#hNext").addEventListener("click", (e) => { e.stopPropagation(); showSlide(state.hero + 1); startHero(); });
+  (() => {
+    let x0 = null, moved = false; const h = $("#hero");
+    h.addEventListener("touchstart", (e) => { x0 = e.touches[0].clientX; moved = false; }, { passive: true });
+    h.addEventListener("touchmove", (e) => { if (x0 != null && Math.abs(e.touches[0].clientX - x0) > 10) moved = true; }, { passive: true });
+    h.addEventListener("touchend", (e) => { if (x0 == null) return; const dx = e.changedTouches[0].clientX - x0; x0 = null; if (Math.abs(dx) > 40) { showSlide(state.hero + (dx < 0 ? 1 : -1)); startHero(); } });
+    h.addEventListener("click", (e) => { if (moved) { e.stopPropagation(); e.preventDefault(); moved = false; } }, true);
+  })();
+  $("#catBtn").addEventListener("click", (e) => { const m = $("#catMenu"), r = e.currentTarget.getBoundingClientRect(); m.style.left = r.left + "px"; m.hidden = !m.hidden; });
+  $("#userBtn").addEventListener("click", () => { if (!state.user) { openAuth(); return; } $("#menu").hidden = !$("#menu").hidden; });
+  $("#bellBtn").addEventListener("click", () => toast("Шинэ мэдэгдэл алга"));
+  $("#menuPlans").addEventListener("click", openSubPaywall);
+  $("#promoBtn").addEventListener("click", openSubPaywall);
+  $("#logoutBtn").addEventListener("click", async () => { $("#menu").hidden = true; await sb?.auth.signOut(); toast("Гарлаа"); });
+  $("#yr").textContent = new Date().getFullYear();
+  if (cfg.FB_PAGE_URL) $("#fbLink").href = cfg.FB_PAGE_URL; else $("#fbLink").closest("div").hidden = true;
+  document.addEventListener("keydown", (e) => { if (e.key === "Escape") { $("#menu").hidden = true; $("#catMenu").hidden = true; } });
+  $("#q").addEventListener("input", (e) => { state.q = e.target.value; if (state.q.trim() && state.view === "home") { state.view = "all"; state.cat = "all"; } if (!state.q.trim() && state.view === "all" && state.cat === "all") state.view = "home"; render(); });
+  $("#sort").value = state.sort;
+  $("#sort").addEventListener("change", (e) => { state.sort = e.target.value; store.set("kz.sort", state.sort); render(); });
+  $("#payDlg").addEventListener("close", () => { stopPolling(); state.pay = null; });
+  $("#movieDlg").addEventListener("close", async () => { state.current = null; await stopPlayer(); $("#movieBody").innerHTML = ""; });
+  addEventListener("pagehide", () => { const k = state.kp; if (k?.pos) saveProgress(k.movieId, k.epId, k.pos, k.dur, k.isLast); });
+
+  // ---------- Эхлүүлэх ----------
+  let splashDone = false;
+  function hideSplash() { if (splashDone) return; splashDone = true; const el = document.getElementById("splash"); if (!el) return; const wait = Math.max(0, 1200 - (Date.now() - (window.__splashT0 || 0))); setTimeout(() => { el.classList.add("out"); setTimeout(() => el.remove(), 600); }, wait); }
+  setTimeout(hideSplash, 3500);
+  renderCats();
+  (async () => {
+    render(); startHero();
+    if (!sb) { hideSplash(); return; }
+    [state.movies] = await Promise.all([loadMovies(), loadPlans()]);
+    const { data } = await sb.auth.getSession();
+    await onUser(data.session?.user || null);
+    hideSplash();
+    sb.auth.onAuthStateChange((_e, s) => { if ((s?.user?.id || null) !== (state.user?.id || null)) onUser(s?.user || null); });
+  })();
+})();
+</script>
+</body>
+</html>
