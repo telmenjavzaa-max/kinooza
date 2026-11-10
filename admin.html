@@ -143,6 +143,7 @@ dialog::backdrop { background: #000c; }
       <button class="tab" role="tab" data-tab="plans" aria-selected="false">Багц</button>
       <button class="tab" role="tab" data-tab="payments" aria-selected="false">Төлбөр</button>
       <button class="tab" role="tab" data-tab="users" aria-selected="false">Хэрэглэгчид</button>
+      <button class="tab" role="tab" data-tab="admins" aria-selected="false">Админууд</button>
     </nav>
 
     <section id="tab-movies">
@@ -172,6 +173,18 @@ dialog::backdrop { background: #000c; }
       <div class="table-wrap"><table>
         <thead><tr><th>Хэрэглэгч</th><th>Бүртгүүлсэн</th><th>Сүүлд орсон</th><th>Багц</th><th>Түрээс</th><th></th></tr></thead>
         <tbody id="userRows"></tbody>
+      </table></div>
+    </section>
+
+    <section id="tab-admins" hidden>
+      <form class="toolbar" id="adminForm">
+        <input id="aEmail" type="email" required placeholder="Шинэ админы Gmail хаяг…" aria-label="Админы имэйл" autocomplete="off">
+        <button class="btn primary" id="aAdd">+ Админ нэмэх</button>
+      </form>
+      <p class="hint" style="margin:0 0 12px">Сайтад өмнө нэвтэрсэн хүн шууд админ болно. Нэвтэрч байгаагүй бол урилга үүснэ, тэр хүн тэр Gmail-ээр анх нэвтрэхэд автоматаар админ болно. Админ бүх кино, багц, төлбөр, хэрэглэгчийг удирдах эрхтэй.</p>
+      <div class="table-wrap"><table>
+        <thead><tr><th>Имэйл</th><th>Төлөв</th><th>Нэмсэн</th><th></th></tr></thead>
+        <tbody id="adminRows"></tbody>
       </table></div>
     </section>
 
@@ -331,9 +344,10 @@ dialog::backdrop { background: #000c; }
   // ---------- Таб ----------
   document.querySelectorAll(".tab").forEach((t) => t.addEventListener("click", () => {
     document.querySelectorAll(".tab").forEach((x) => x.setAttribute("aria-selected", x === t));
-    ["movies", "plans", "payments", "users"].forEach((n) => ($("#tab-" + n).hidden = n !== t.dataset.tab));
+    ["movies", "plans", "payments", "users", "admins"].forEach((n) => ($("#tab-" + n).hidden = n !== t.dataset.tab));
     if (t.dataset.tab === "payments") loadPayments();
     if (t.dataset.tab === "users") loadUsers();
+    if (t.dataset.tab === "admins") loadAdmins();
   }));
 
   // ---------- Кинонууд ----------
@@ -629,6 +643,36 @@ dialog::backdrop { background: #000c; }
     if (error) { msg.className = "msg err"; msg.textContent = "Олгож чадсангүй: " + error.message; return; }
     msg.className = "msg ok"; msg.textContent = `Эрх олгогдлоо: ${dd(data)} хүртэл.`;
     toast("Эрх олгогдлоо"); loadGrantEnts(); loadUsers();
+  });
+
+  // ---------- Админууд ----------
+  async function loadAdmins() {
+    const { data, error } = await sb.rpc("admin_list_admins");
+    if (error) { $("#adminRows").innerHTML = `<tr><td colspan="4" class="empty">Ачаалж чадсангүй: ${esc(error.message)}</td></tr>`; return; }
+    $("#adminRows").innerHTML = (data || []).map((a) => `
+      <tr>
+        <td><b>${esc(a.email)}</b>${a.is_me ? ' <span class="pill">та</span>' : ""}</td>
+        <td>${a.kind === "admin" ? '<span class="pill ok">админ</span>' : '<span class="pill warn">урилга — нэвтрэхийг хүлээж байна</span>'}</td>
+        <td class="num">${dd(a.created_at)}</td>
+        <td>${a.is_me ? "" : `<button class="btn sm danger" data-unadmin="${esc(a.user_id || "")}" data-unemail="${esc(a.email)}">Хасах</button>`}</td>
+      </tr>`).join("") || `<tr><td colspan="4" class="empty">Админ алга.</td></tr>`;
+  }
+  $("#adminForm").addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const email = $("#aEmail").value.trim(); if (!email) return;
+    $("#aAdd").disabled = true;
+    const { data, error } = await sb.rpc("admin_add_admin", { p_email: email });
+    $("#aAdd").disabled = false;
+    if (error) { toast("Нэмж чадсангүй: " + error.message); return; }
+    toast(data === "added" ? "Админ эрх олгогдлоо" : "Урилга үүслээ — тэр хүн нэвтэрмэгц админ болно");
+    $("#aEmail").value = ""; loadAdmins(); if (state.users) loadUsers();
+  });
+  document.addEventListener("click", async (e) => {
+    const b = e.target.closest("[data-unadmin]"); if (!b) return;
+    if (!confirm(`${b.dataset.unemail} — админ эрхийг хасах уу?`)) return;
+    const { error } = await sb.rpc("admin_remove_admin", b.dataset.unadmin ? { p_user: b.dataset.unadmin } : { p_email: b.dataset.unemail });
+    if (error) { toast("Хасаж чадсангүй: " + error.message); return; }
+    toast("Админ эрх хасагдлаа"); loadAdmins();
   });
 
   // ---------- Багц / үнэ ----------
