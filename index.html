@@ -451,8 +451,12 @@ footer .fine { grid-column: 1 / -1; border-top: 1px solid var(--line); padding-t
         <label for="phone">Утасны дугаар
           <span class="phone-row"><span class="cc">+976</span><input id="phone" type="tel" inputmode="numeric" autocomplete="tel-national" placeholder="9911 2233" maxlength="9"></span>
         </label>
+        <label for="pin" style="margin-top:10px">4 оронтой PIN код
+          <input id="pin" type="password" inputmode="numeric" autocomplete="current-password" maxlength="4" placeholder="••••">
+        </label>
         <div style="height:10px"></div>
-        <button class="btn primary wide" type="submit" id="sendCodeBtn">Код илгээх</button>
+        <button class="btn primary wide" type="submit" id="pinLoginBtn">Нэвтрэх</button>
+        <button class="btn ghost wide" type="button" id="sendCodeBtn" style="margin-top:8px">Анх удаа эсвэл PIN мартсан бол → SMS код авах</button>
       </form>
       <form id="codeForm" novalidate hidden>
         <label for="code">SMS-ээр ирсэн 6 оронтой код
@@ -463,6 +467,17 @@ footer .fine { grid-column: 1 / -1; border-top: 1px solid var(--line); padding-t
           <button class="btn primary" type="submit">Баталгаажуулах</button>
           <button class="btn ghost" type="button" id="changePhone">Дугаар солих</button>
         </div>
+      </form>
+      <form id="pinSetForm" novalidate hidden>
+        <p class="note" style="margin:0 0 8px">Дараагийн удаа SMS хүлээлгүй, дугаар + PIN кодоор шууд нэвтэрнэ.</p>
+        <label for="pin1">Шинэ 4 оронтой PIN код
+          <input id="pin1" type="password" inputmode="numeric" autocomplete="new-password" maxlength="4" placeholder="••••">
+        </label>
+        <label for="pin2" style="margin-top:10px">PIN кодоо давтана уу
+          <input id="pin2" type="password" inputmode="numeric" autocomplete="new-password" maxlength="4" placeholder="••••">
+        </label>
+        <div style="height:10px"></div>
+        <button class="btn primary wide" type="submit" id="pinSaveBtn">PIN хадгалах</button>
       </form>
     </div>
     <div class="msg" id="authMsg" role="status"></div>
@@ -946,7 +961,7 @@ footer .fine { grid-column: 1 / -1; border-top: 1px solid var(--line); padding-t
   $("#phoneBlock").hidden = !PHONE;
   function authMsg(text, kind = "") { const m = $("#authMsg"); m.textContent = text; m.className = "msg " + kind; }
   function openAuth(hint) {
-    authMsg(""); $("#phoneForm").hidden = false; $("#codeForm").hidden = true;
+    authMsg(""); $("#phoneForm").hidden = false; $("#codeForm").hidden = true; $("#pinSetForm").hidden = true; $("#googleBtn").hidden = false; $("#pin").value = "";
     $("#authHint").textContent = hint || "Кино үзэхийн тулд нэвтэрнэ үү.";
     if ($("#movieDlg").open) $("#movieDlg").close();
     $("#authDlg").showModal();
@@ -956,22 +971,51 @@ footer .fine { grid-column: 1 / -1; border-top: 1px solid var(--line); padding-t
     const { error } = await sb.auth.signInWithOAuth({ provider: "google", options: { redirectTo: location.origin + location.pathname } });
     if (error) authMsg(error.message, "err");
   });
+  // Утас + 4 оронтой PIN (Supabase-ийн нууц үгийн доод урт 6 тул PIN-ийг тогтмол хэлбэрт оруулна)
+  const pinPw = (pin) => `kz${pin}#pin`;
+  const phoneDigits = () => { const d = $("#phone").value.replace(/\D/g, ""); return /^[6-9]\d{7}$/.test(d) ? d : null; };
   $("#phoneForm").addEventListener("submit", async (e) => {
-    e.preventDefault(); const digits = $("#phone").value.replace(/\D/g, "");
-    if (!/^[6-9]\d{7}$/.test(digits)) { authMsg("8 оронтой утасны дугаараа оруулна уу.", "err"); return; }
+    e.preventDefault(); const digits = phoneDigits();
+    if (!digits) { authMsg("8 оронтой утасны дугаараа оруулна уу.", "err"); return; }
+    const pin = $("#pin").value.replace(/\D/g, "");
+    if (pin.length !== 4) { authMsg("4 оронтой PIN кодоо оруулна уу. Анх удаа бол доорх SMS товчийг дарна уу.", "err"); $("#pin").focus(); return; }
+    state.phone = "+976" + digits; $("#pinLoginBtn").disabled = true; authMsg("Нэвтэрч байна…");
+    const { error } = await sb.auth.signInWithPassword({ phone: state.phone, password: pinPw(pin) });
+    $("#pinLoginBtn").disabled = false;
+    if (error) { authMsg("Дугаар эсвэл PIN буруу байна. PIN үүсгээгүй эсвэл мартсан бол SMS код авна уу.", "err"); return; }
+    $("#authDlg").close(); toast("Нэвтэрлээ");
+  });
+  $("#sendCodeBtn").addEventListener("click", async () => {
+    const digits = phoneDigits();
+    if (!digits) { authMsg("8 оронтой утасны дугаараа оруулна уу.", "err"); $("#phone").focus(); return; }
     state.phone = "+976" + digits; $("#sendCodeBtn").disabled = true; authMsg("Код илгээж байна…");
     const { error } = await sb.auth.signInWithOtp({ phone: state.phone }); $("#sendCodeBtn").disabled = false;
     if (error) { authMsg("Код илгээж чадсангүй: " + error.message, "err"); return; }
-    $("#phoneForm").hidden = true; $("#codeForm").hidden = false; $("#code").focus(); authMsg(`${state.phone} дугаарт код илгээлээ.`, "ok");
+    $("#phoneForm").hidden = true; $("#codeForm").hidden = false; $("#code").value = ""; $("#code").focus(); authMsg(`${state.phone} дугаарт код илгээлээ.`, "ok");
   });
   $("#codeForm").addEventListener("submit", async (e) => {
     e.preventDefault(); const token = $("#code").value.replace(/\D/g, "");
     if (token.length !== 6) { authMsg("6 оронтой кодоо оруулна уу.", "err"); return; }
+    state.pinSetting = true;
     const { error } = await sb.auth.verifyOtp({ phone: state.phone, token, type: "sms" });
-    if (error) { authMsg("Код буруу эсвэл хугацаа нь дууссан.", "err"); return; }
-    $("#authDlg").close(); toast("Нэвтэрлээ"); track("CompleteRegistration", { method: "phone" });
+    if (error) { state.pinSetting = false; authMsg("Код буруу эсвэл хугацаа нь дууссан.", "err"); return; }
+    track("CompleteRegistration", { method: "phone" });
+    $("#codeForm").hidden = true; $("#googleBtn").hidden = true; $("#pinSetForm").hidden = false; $("#pin1").value = $("#pin2").value = ""; $("#pin1").focus();
+    authMsg("Дугаар баталгаажлаа. Одоо PIN кодоо үүсгэнэ үү.", "ok");
+  });
+  $("#pinSetForm").addEventListener("submit", async (e) => {
+    e.preventDefault(); const p1 = $("#pin1").value.replace(/\D/g, ""), p2 = $("#pin2").value.replace(/\D/g, "");
+    if (p1.length !== 4) { authMsg("4 оронтой тоо оруулна уу.", "err"); return; }
+    if (p1 !== p2) { authMsg("Хоёр PIN код таарахгүй байна.", "err"); return; }
+    if (/^(\d)\1{3}$/.test(p1) || "0123456789".includes(p1) || "9876543210".includes(p1)) { authMsg("Хэт амархан PIN байна (1111, 1234 гэх мэт). Өөр код сонгоно уу.", "err"); return; }
+    $("#pinSaveBtn").disabled = true; authMsg("Хадгалж байна…");
+    const { error } = await sb.auth.updateUser({ password: pinPw(p1), data: { has_pin: true } });
+    $("#pinSaveBtn").disabled = false;
+    if (error) { authMsg("PIN хадгалж чадсангүй: " + error.message, "err"); return; }
+    state.pinSetting = false; $("#authDlg").close(); toast("PIN хадгалагдлаа. Дараа нь дугаар + PIN-ээр нэвтэрнэ."); runPending();
   });
   $("#changePhone").addEventListener("click", () => { $("#phoneForm").hidden = false; $("#codeForm").hidden = true; authMsg(""); });
+  $("#authDlg").addEventListener("close", () => { if (state.pinSetting && state.user) { state.pinSetting = false; toast("PIN үүсгээгүй тул дараа нь SMS кодоор нэвтэрнэ."); runPending(); } });
 
   function renderUser() {
     const u = state.user, ub = $("#userBtn");
@@ -985,8 +1029,9 @@ footer .fine { grid-column: 1 / -1; border-top: 1px solid var(--line); padding-t
     state.user = user;
     await Promise.all([loadFavs(), loadAccess(), loadProgress()]);
     render();
-    if (user && state.pendingPlay) { const p = state.pendingPlay; state.pendingPlay = null; p.ep ? playEpisode(p.ep, p.id) : play(p.id); }
+    if (user && !state.pinSetting) runPending();
   }
+  function runPending() { if (!state.user || !state.pendingPlay) return; const p = state.pendingPlay; state.pendingPlay = null; p.ep ? playEpisode(p.ep, p.id) : play(p.id); }
 
   // ---------- Үйлдлүүд ----------
   document.addEventListener("click", (e) => {
