@@ -248,23 +248,25 @@ dialog::backdrop { background: #000c; backdrop-filter: blur(4px); }
 
 /* Нээгдэх үеийн лого */
 /* Нээгдэх үеийн лого: гэрэлтэн гарч ирээд, томорч бүдэгрэн алга болно */
-#splash { position: fixed; inset: 0; z-index: 100; background: var(--bg); display: grid; place-items: center; overflow: hidden; transition: opacity .7s ease .15s, visibility .85s; }
-#splash::before { content: ""; position: absolute; width: 90vmax; height: 90vmax; border-radius: 50%; background: radial-gradient(circle, #ff2d5540 0%, #7a1d5a22 35%, transparent 65%); animation: splashGlow 2.4s ease-in-out infinite alternate; }
-#splash .logo-wrap { position: relative; width: min(320px, 64vw); animation: splashIn 1s cubic-bezier(.16,1,.3,1) both; }
-#splash .logo-wrap img { width: 100%; height: auto; display: block; filter: drop-shadow(0 0 28px #ff2d5566); }
-#splash .logo-wrap::after { content: ""; position: absolute; inset: 0; background: linear-gradient(105deg, transparent 40%, #ffffffcc 50%, transparent 60%) 160% 0 / 300% 100% no-repeat; mix-blend-mode: overlay; -webkit-mask: url(img/logo-full.png) center / 100% 100% no-repeat; mask: url(img/logo-full.png) center / 100% 100% no-repeat; animation: splashShine 1.3s ease .55s both; }
-#splash .bar2 { position: absolute; bottom: 20%; width: 120px; height: 3px; border-radius: 3px; background: #ffffff14; overflow: hidden; animation: splashFade .5s ease .4s both; }
+#splash { position: fixed; inset: 0; z-index: 100; background: var(--bg); display: grid; place-content: center; justify-items: center; gap: 14px; overflow: hidden; transition: opacity .3s ease, visibility .3s; }
+#splash .kz-mark { position: relative; width: min(132px, 30vw); aspect-ratio: 307 / 256; }
+#splash .kz-draw { position: absolute; inset: -6% -4%; width: 108%; height: 112%; overflow: visible; }
+#splash .kz-draw path { fill: none; stroke: var(--red); stroke-width: 3.2; stroke-linejoin: round; stroke-linecap: round; stroke-dasharray: 1; stroke-dashoffset: 1; filter: drop-shadow(0 0 6px #ff2d55aa); animation: kzDraw .6s cubic-bezier(.6,0,.3,1) both, kzFade .35s ease .75s forwards; }
+#splash .kz-draw path.b { animation-delay: .22s, .8s; stroke: #ffffffcc; stroke-width: 2.4; }
+#splash .kz-icon { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: contain; filter: drop-shadow(0 6px 22px #ff2d5566); animation: kzPop .5s cubic-bezier(.3,1.6,.5,1) .55s both; }
+#splash .kz-glint { position: absolute; left: 50%; top: 46%; width: 70%; aspect-ratio: 1; margin: -35% 0 0 -35%; border-radius: 50%; border: 2px solid #ff6b8a; animation: kzGlint .9s ease-out 1.0s both; pointer-events: none; }
+#splash .kz-word { width: min(230px, 52vw); height: auto; animation: kzRise .5s cubic-bezier(.2,.8,.2,1) .95s both; }
+#splash .kz-tag { font-size: 13px; color: var(--muted); letter-spacing: .02em; animation: kzRise .5s cubic-bezier(.2,.8,.2,1) 1.12s both; }
+#splash .bar2 { position: absolute; bottom: 18%; left: 50%; margin-left: -60px; width: 120px; height: 3px; border-radius: 3px; background: #ffffff14; overflow: hidden; animation: kzFadeIn .4s ease 1.3s both; }
 #splash .bar2 i { display: block; width: 40%; height: 100%; border-radius: 3px; background: linear-gradient(90deg, transparent, var(--red), transparent); animation: splashBar 1.1s ease-in-out infinite; }
-#splash.out { opacity: 0; visibility: hidden; }
-#splash.out .logo-wrap { animation: splashOut .8s cubic-bezier(.7,0,.84,0) both; }
-#splash.out .bar2 { opacity: 0; transition: opacity .2s; }
-body.splashing > header, body.splashing > main { opacity: 0; transform: scale(.985); }
-body > header, body > main { transition: opacity .8s ease .2s, transform .9s cubic-bezier(.16,1,.3,1) .2s; }
-@keyframes splashIn { from { opacity: 0; transform: scale(.72); filter: blur(10px); } 60% { opacity: 1; filter: blur(0); } to { opacity: 1; transform: scale(1); } }
-@keyframes splashOut { to { opacity: 0; transform: scale(1.35); filter: blur(14px); } }
-@keyframes splashShine { from { background-position: 160% 0; } to { background-position: -60% 0; } }
-@keyframes splashGlow { from { transform: scale(.85); opacity: .7; } to { transform: scale(1.1); opacity: 1; } }
-@keyframes splashFade { from { opacity: 0; } to { opacity: 1; } }
+#splash.out { opacity: 0; visibility: hidden; pointer-events: none; }
+body.splashing > header, body.splashing > main { opacity: 0; }
+@keyframes kzDraw { from { stroke-dashoffset: 1; } to { stroke-dashoffset: 0; } }
+@keyframes kzFade { to { opacity: 0; } }
+@keyframes kzFadeIn { from { opacity: 0; } to { opacity: 1; } }
+@keyframes kzPop { from { opacity: 0; transform: scale(0); } to { opacity: 1; transform: scale(1); } }
+@keyframes kzGlint { 0% { opacity: 0; transform: scale(.6); } 12% { opacity: .9; } 100% { opacity: 0; transform: scale(2.6); } }
+@keyframes kzRise { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
 @keyframes splashBar { from { transform: translateX(-100%); } to { transform: translateX(250%); } }
 
 footer { border-top: 1px solid var(--line); color: var(--muted); font-size: 13px; margin-top: 20px; }
@@ -314,13 +316,19 @@ footer .fine { grid-column: 1 / -1; border-top: 1px solid var(--line); padding-t
   .d-body { padding: 16px 16px 22px; }
   .now-playing { padding: 10px 16px; }
 }
-@media (prefers-reduced-motion: reduce) { * { transition: none !important; animation: none !important; } }
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; animation: none !important; } #splash .kz-glint, #splash .kz-draw { display: none; } }
 </style>
 </head>
 <body>
 
 <div id="splash" aria-hidden="true">
-  <div class="logo-wrap"><img src="img/logo-full.png" alt=""></div>
+  <div class="kz-mark">
+    <svg class="kz-draw" viewBox="0 0 100 100" preserveAspectRatio="none"><path d="M18 12 L90 52 L22 90 Z" pathLength="1"/><path class="b" d="M42 34 L62 46 L42 58 Z" pathLength="1"/></svg>
+    <img class="kz-icon" src="img/logo-icon.png" alt="">
+    <span class="kz-glint"></span>
+  </div>
+  <img class="kz-word" src="img/logo-word.png" alt="">
+  <div class="kz-tag">Ази кино, цувралын ертөнц</div>
   <div class="bar2"><i></i></div>
 </div>
 <script>
@@ -1033,8 +1041,8 @@ footer .fine { grid-column: 1 / -1; border-top: 1px solid var(--line); padding-t
   function hideSplash() {
     if (splashDone) return; splashDone = true;
     const el = document.getElementById("splash"); if (!el) { document.body.classList.remove("splashing"); return; }
-    const wait = Math.max(0, 1900 - (Date.now() - (window.__splashT0 || 0))); // гялбаа дуустал харуулна
-    setTimeout(() => { el.classList.add("out"); document.body.classList.remove("splashing"); setTimeout(() => el.remove(), 1000); }, wait);
+    const wait = Math.max(0, 1750 - (Date.now() - (window.__splashT0 || 0))); // гялбаа дуустал харуулна
+    setTimeout(() => { el.classList.add("out"); document.body.classList.remove("splashing"); setTimeout(() => el.remove(), 400); }, wait);
   }
   setTimeout(hideSplash, 3500);
   renderCats();
