@@ -541,6 +541,7 @@ footer .fine { grid-column: 1 / -1; border-top: 1px solid var(--line); padding-t
     </div>`;
   }
   const cardHTML = (m) => `<button class="card" data-open="${m.id}" aria-label="${esc(m.title)}">${posterHTML(m)}<div class="name">${esc(m.title)}</div></button>`;
+  const trailerHTML = (m) => `<button class="card" data-trailer="${m.id}" aria-label="${esc(m.title)} — трейлер">${posterHTML(m, false).replace(/<\/div>\s*$/, `<span class="badge">▶ Трейлер</span><div class="play"><i>${playIc}</i></div></div>`)}<div class="name">${esc(m.title)}</div></button>`;
   const topHTML = (m, i) => `<div class="topcard"><span class="num" aria-hidden="true">${i + 1}</span>${cardHTML(m)}</div>`;
   const resumeHTML = (m) => {
     const r = state.progress.get(m.id) || {};
@@ -627,7 +628,7 @@ footer .fine { grid-column: 1 / -1; border-top: 1px solid var(--line); padding-t
   }
   function rowHTML(title, list, more, kind = "") {
     if (!list.length) return "";
-    const items = kind === "top" ? list.map(topHTML) : kind === "resume" ? list.map(resumeHTML) : list.map(cardHTML);
+    const items = kind === "top" ? list.map(topHTML) : kind === "resume" ? list.map(resumeHTML) : kind === "trailer" ? list.map(trailerHTML) : list.map(cardHTML);
     return `<section class="row"><div class="row-head"><h3>${esc(title)}</h3>${more ? `<button data-more="${esc(more)}">Бүгдийг үзэх ›</button>` : ""}</div>
       <div class="track-wrap"><button class="arrow l" data-scroll="-1" aria-label="Зүүн">‹</button><div class="track${kind === "top" ? " top" : ""}">${items.join("")}</div><button class="arrow r" data-scroll="1" aria-label="Баруун">›</button></div></section>`;
   }
@@ -637,6 +638,7 @@ footer .fine { grid-column: 1 / -1; border-top: 1px solid var(--line); padding-t
     const cont = [...state.progress.values()].map((r) => all.find((m) => m.id === r.movie_id)).filter((m) => m && m.has_video);
     let html = cont.length ? rowHTML("Үргэлжлүүлж үзэх", cont, null, "resume") : "";
     html += rowHTML("Шинээр нэмэгдсэн", [...all].sort(byNew).slice(0, 20), "new");
+    html += rowHTML("Трейлер", all.filter((m) => m.trailer_url).sort(byNew).slice(0, 20), null, "trailer");
     const top = [...all].filter((m) => m.views > 0).sort(byTop).slice(0, 10);
     html += rowHTML("Топ үзэлттэй", top.length >= 3 ? top : [...all].sort(byTop).slice(0, 10), "top", "top");
     html += '<div id="promoSlot"></div>';
@@ -717,7 +719,7 @@ footer .fine { grid-column: 1 / -1; border-top: 1px solid var(--line); padding-t
     }).join("");
     $("#movieBody").innerHTML = `
       ${playing ? `<div class="player" id="playerBox"></div>
-        <div class="now-playing"><span><b>${esc(m.title)}</b>${playing.episode ? ` · ${playing.episode.season > 1 ? playing.episode.season + "-р улирал, " : ""}${playing.episode.number}-р анги` : ""}</span>
+        <div class="now-playing"><span><b>${esc(m.title)}</b>${playing.trailer ? " · Трейлер" : ""}${playing.episode ? ` · ${playing.episode.season > 1 ? playing.episode.season + "-р улирал, " : ""}${playing.episode.number}-р анги` : ""}</span>
         ${playing.next ? `<button class="btn" data-playep="${playing.next.id}">Дараагийн анги ›</button>` : ""}</div>`
         : `<div class="d-hero" style="${m.backdrop_url || m.poster_url ? `background-image:url('${esc(m.backdrop_url || m.poster_url)}')` : ""}"></div>`}
       ${playing ? "" : `<div class="d-head">${posterHTML(m, false)}<div style="min-width:0">
@@ -727,7 +729,7 @@ footer .fine { grid-column: 1 / -1; border-top: 1px solid var(--line); padding-t
       <div class="d-body">
         ${playing ? `<h2 id="dTitle" class="sec-title">${esc(m.title)}</h2>` : ""}
         ${m.description ? `<p>${esc(m.description)}</p>` : ""}
-        <div class="actions">${playing ? "" : mainBtn}<button class="btn" data-fav="${m.id}">${state.favs.has(m.id) ? "★ Жагсаалтаас хасах" : "☆ Миний жагсаалтад"}</button></div>
+        <div class="actions">${playing ? "" : mainBtn}${!playing && m.trailer_url ? `<button class="btn" data-trailer="${m.id}">▶ Трейлер</button>` : ""}${playing?.trailer && m.has_video ? `<button class="btn primary" data-play="${m.id}">${playIc.replace("<svg", '<svg fill="currentColor"')} Бүтэн киног үзэх</button>` : ""}<button class="btn" data-fav="${m.id}">${state.favs.has(m.id) ? "★ Жагсаалтаас хасах" : "☆ Миний жагсаалтад"}</button></div>
         ${m.kind === "series" ? `<div style="display:grid;gap:12px">
           <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap"><h3 class="sec-title">Ангиуд</h3>
           ${seasons.length > 1 ? `<div class="seasons">${seasons.map((s) => `<button class="chip" data-season="${s}" aria-pressed="${s === selSeason}">${s}-р улирал</button>`).join("")}</div>` : ""}</div>
@@ -789,7 +791,7 @@ footer .fine { grid-column: 1 / -1; border-top: 1px solid var(--line); padding-t
     const src = embedUrl(playing.url); if (!src) { box.innerHTML = ""; toast("Видеоны холбоос буруу байна"); return; }
     const epId = playing.episode?.id || null;
     const pr = state.progress.get(m.id);
-    const start = pr && pr.position_sec > 20 && (pr.episode_id || null) === epId ? pr.position_sec : 0;
+    const start = !playing.trailer && pr && pr.position_sec > 20 && (pr.episode_id || null) === epId ? pr.position_sec : 0;
     const wm = watermarkText();
     const isK = /(^|\.)kinescope\.io$/.test(new URL(src).hostname);
     const isLast = !playing.next;
@@ -800,7 +802,8 @@ footer .fine { grid-column: 1 / -1; border-top: 1px solid var(--line); padding-t
       if (!document.getElementById("playerBox")) return;
       box.innerHTML = `<div id="kp"></div>`;
       const player = await factory.create("kp", { url: src, size: { width: "100%", height: "100%" }, behavior: { autoPlay: true, localStorage: false }, ui: wm ? { watermark: { text: wm, mode: "random", scale: 0.6 } } : {} });
-      const k = state.kp = { player, movieId: m.id, epId, last: 0, dur: 0, pos: 0, isLast };
+      const k = state.kp = { player, movieId: m.id, epId, last: 0, dur: 0, pos: 0, isLast, trailer: !!playing.trailer };
+      if (playing.trailer) return;
       const E = player.Events || {};
       let seeked = false;
       player.on(E.Loaded || "loaded", async () => { if (seeked) return; seeked = true; try { k.dur = await player.getDuration(); } catch {} if (start && (!k.dur || start < k.dur - 60)) { try { await player.seekTo(start); } catch {} } });
@@ -811,6 +814,7 @@ footer .fine { grid-column: 1 / -1; border-top: 1px solid var(--line); padding-t
   }
   async function stopPlayer() {
     const k = state.kp; state.kp = null; if (!k) return;
+    if (k.trailer) { try { k.player.destroy?.(); } catch {} return; }
     try { const t = await k.player.getCurrentTime(); if (t > 0) await saveProgress(k.movieId, k.epId, t, k.dur, k.isLast); } catch {}
     try { k.player.destroy?.(); } catch {}
     if (state.view === "home") renderRows();
@@ -830,6 +834,11 @@ footer .fine { grid-column: 1 / -1; border-top: 1px solid var(--line); padding-t
     sb.rpc("record_view", { p_movie: id });
     await stopPlayer();
     openMovie(id, { url: data.video_url });
+  }
+  async function playTrailer(id) {
+    const m = state.movies.find((x) => x.id === id); if (!m?.trailer_url) return;
+    await stopPlayer();
+    openMovie(id, { url: m.trailer_url, trailer: true });
   }
   async function playEpisode(epId, movieIdHint) {
     const movieId = movieIdHint || state.current?.id;
@@ -979,6 +988,7 @@ footer .fine { grid-column: 1 / -1; border-top: 1px solid var(--line); padding-t
     let el;
     if ((el = t("[data-buy]"))) { if (!el.disabled) buy(el.dataset.buy, el.dataset.movie ? +el.dataset.movie : null); return; }
     if ((el = t("[data-brandgo]"))) { const r = $("#hero").nextElementSibling; if (r) r.scrollIntoView({ behavior: "smooth", block: "start" }); return; }
+    if ((el = t("[data-trailer]"))) { playTrailer(+el.dataset.trailer); return; }
     if ((el = t("[data-playep]"))) { playEpisode(+el.dataset.playep); return; }
     if ((el = t("[data-play]"))) { if (!el.disabled) play(+el.dataset.play); return; }
     if ((el = t("[data-resume]"))) { play(+el.dataset.resume); return; }

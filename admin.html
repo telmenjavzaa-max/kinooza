@@ -225,6 +225,9 @@ dialog::backdrop { background: #000c; }
         <label class="f" id="eVideoWrap">Видео холбоос (Kinescope / Bunny / Vimeo)
           <input id="eVideo" type="url" placeholder="https://kinescope.io/…">
         </label>
+        <label class="f">Трейлер — 3–5 мин бичлэг (заавал биш, хүн бүр үнэгүй үзнэ)
+          <input id="eTrailer" type="url" placeholder="https://kinescope.io/…">
+        </label>
         <div class="backdrop-box f" style="display:grid;gap:6px">
           <span style="font-size:12px;color:var(--muted)">Слайдерын өргөн зураг (заавал биш, 16:7, жишээ 1600×700)</span>
           <img id="eBackImg" alt="" hidden>
@@ -410,6 +413,7 @@ dialog::backdrop { background: #000c; }
     $("#eDesc").value = m?.description || "";
     $("#eVideo").value = m ? (state.videos[m.id] || "") : "";
     $("#eRent").value = m?.rent_price || "";
+    $("#eTrailer").value = m?.trailer_url || "";
     $("#ePublished").checked = m ? !!m.published : true;
     $("#eFeatured").checked = !!m?.featured;
     $("#ePosterImg").src = m?.poster_url || "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg'/%3E";
@@ -514,6 +518,8 @@ dialog::backdrop { background: #000c; }
     const title = $("#eTitleIn").value.trim();
     const video = $("#eVideo").value.trim();
     if (!title) { msg.className = "msg err"; msg.textContent = "Нэрийг бичнэ үү."; $("#eTitleIn").focus(); return; }
+    const trailer = $("#eTrailer").value.trim();
+    if (trailer && !validVideo(trailer)) { msg.className = "msg err"; msg.textContent = "Трейлерийн холбоос Kinescope, Bunny эсвэл Vimeo-гийн https хаяг байх ёстой."; return; }
     if (!validVideo(video)) { msg.className = "msg err"; msg.textContent = "Видео холбоос Bunny (mediadelivery.net), Kinescope эсвэл Vimeo-гийн https хаяг байх ёстой."; return; }
     $("#eSave").disabled = true; msg.className = "msg"; msg.textContent = "Хадгалж байна…";
     try {
@@ -529,6 +535,7 @@ dialog::backdrop { background: #000c; }
         kind: $("#eKind").value,
         age_rating: $("#eAge").value.trim() || null,
         tags: state.tags,
+        trailer_url: trailer || null,
         ongoing: $("#eKind").value === "series" && $("#eOngoing").checked,
       };
       if ($("#eKind").value === "series") row.runtime = null;
