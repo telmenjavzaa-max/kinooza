@@ -252,7 +252,10 @@ dialog::backdrop { background: #000c; }
       <div id="epRows" style="display:grid;gap:8px"></div>
       <div class="msg" id="epMsg" role="status"></div>
     </div>
-    <p class="hint" id="epNewHint" hidden>Цувралыг эхлээд хадгалсны дараа анги нэмэх боломжтой болно.</p>
+    <div class="eps-box" id="epNewHint" hidden style="border-style:dashed">
+      <b>Ангиуд (видео)</b>
+      <span class="hint" style="font-size:13px">Цувралын видеог <b>анги тус бүрээр</b> оруулна. Эхлээд доорх <b>"Хадгалаад анги нэмэх"</b> товчийг дарна уу — тэгмэгц энд "+ Анги нэмэх" хэсэг нээгдэж, анги бүрийн Kinescope холбоосыг тавина.</span>
+    </div>
     <div class="msg" id="eMsg" role="status"></div>
     <div class="actions">
       <button type="button" class="btn danger" id="eDelete">Устгах</button>
@@ -391,6 +394,7 @@ dialog::backdrop { background: #000c; }
     const series = $("#eKind").value === "series";
     $("#eVideoWrap").hidden = series; $("#eRuntimeWrap").hidden = series; $("#eOngoingWrap").hidden = !series;
     $("#epsBox").hidden = !series || !state.editing; $("#epNewHint").hidden = !series || !!state.editing;
+    $("#eSave").textContent = series && !state.editing ? "Хадгалаад анги нэмэх" : "Хадгалах";
   }
   function renderTags() {
     const all = [...new Set([...CAT_TAGS, ...state.tags])];
