@@ -78,6 +78,31 @@ async function qpay(path: string, token: string, body: unknown) {
   return JSON.parse(text);
 }
 
+// ---- Meta Conversions API (сервер талаас Purchase) ----
+// Secrets: META_CAPI_TOKEN (заавал), META_PIXEL_ID (сонголттой). Токен байхгүй бол алгасна.
+const sha256 = async (v: string) => Array.from(new Uint8Array(await crypto.subtle.digest("SHA-256", new TextEncoder().encode(v)))).map((b) => b.toString(16).padStart(2, "0")).join("");
+async function sendCapiPurchase(paymentId: string) {
+  const token = Deno.env.get("META_CAPI_TOKEN");
+  const pixel = Deno.env.get("META_PIXEL_ID") || "4602268083325312";
+  if (!token) return;
+  const [p] = await db(`payments?id=eq.${paymentId}&select=id,user_id,amount,plan_code,movie_id,paid_at,fbp,fbc,client_ua`);
+  if (!p) return;
+  // Хувийн мэдээлэл (имэйл, утас) илгээхгүй — зөвхөн кодолсон дотоод ID + Facebook cookie
+  const ud: Record<string, unknown> = { external_id: [await sha256(p.user_id)] };
+  if (p.fbp) ud.fbp = p.fbp;
+  if (p.fbc) ud.fbc = p.fbc;
+  if (p.client_ua) ud.client_user_agent = p.client_ua;
+  const body = { data: [{
+    event_name: "Purchase", event_time: Math.floor(new Date(p.paid_at || Date.now()).getTime() / 1000), event_id: p.id,
+    action_source: "website", event_source_url: "https://kinooza.com/", user_data: ud,
+    custom_data: { currency: "MNT", value: Number(p.amount) || 0, content_ids: [p.movie_id ? String(p.movie_id) : p.plan_code], content_type: "product" },
+  }] };
+  const r = await fetch(`https://graph.facebook.com/v21.0/${pixel}/events?access_token=${encodeURIComponent(token)}`, {
+    method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body),
+  });
+  if (!r.ok) console.error("capi", r.status, await r.text());
+}
+
 // QPay-ээс төлбөрийг шалгаж, төлөгдсөн бол эрх олгоно
 async function verifyAndGrant(payment: { id: string; amount: number; status: string; qpay_invoice_id: string | null }) {
   if (payment.status === "paid") return "paid";
@@ -93,7 +118,8 @@ async function verifyAndGrant(payment: { id: string; amount: number; status: str
   const paidSum = paidRows.reduce((s, r) => s + Number(r.payment_amount || 0), 0);
   const paid = Math.max(paidSum, Number(res?.paid_amount || 0));
   if (paidRows.length && paid >= payment.amount) {
-    await db("rpc/grant_payment", { method: "POST", body: JSON.stringify({ p_payment: payment.id }) });
+    const granted = await db("rpc/grant_payment", { method: "POST", body: JSON.stringify({ p_payment: payment.id }) });
+    if (granted === true) await sendCapiPurchase(payment.id).catch((e) => console.error("capi", e));
     return "paid";
   }
   return "pending";
@@ -142,7 +168,12 @@ Deno.serve(async (req: Request) => {
 
       const [payment] = await db("payments", {
         method: "POST",
-        body: JSON.stringify({ user_id: user.id, plan_code: planCode, movie_id: movieId, amount }),
+        body: JSON.stringify({
+          user_id: user.id, plan_code: planCode, movie_id: movieId, amount,
+          fbp: /^fb\.\d\.\d+\.\d+$/.test(String(body.fbp || "")) ? body.fbp : null,
+          fbc: /^fb\.\d\.\d+\.[\w-]{1,500}$/.test(String(body.fbc || "")) ? body.fbc : null,
+          client_ua: (req.headers.get("user-agent") || "").slice(0, 400) || null,
+        }),
       });
 
       const invoiceCode = Deno.env.get("QPAY_INVOICE_CODE");
