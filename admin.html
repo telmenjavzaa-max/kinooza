@@ -485,7 +485,7 @@ dialog::backdrop { background: #000c; }
         const season = +v("season").value || 1, number = +v("number").value;
         if (!number) throw new Error("Ангийн дугаар бүрийг бөглөнө үү.");
         const key = season + "-" + number; if (seen.has(key)) throw new Error(`${season}-р улирлын ${number}-р анги давхардсан байна.`); seen.add(key);
-        const url = v("url").value.trim();
+        const url = normVideo(v("url").value);
         if (url && !validVideo(url)) throw new Error(`${number}-р ангийн видео холбоос буруу байна.`);
         const row = { movie_id: m.id, season, number, title: v("title").value.trim() || null, runtime: +v("runtime").value || null, published: v("published").checked };
         let id = +r.dataset.ep;
@@ -511,6 +511,13 @@ dialog::backdrop { background: #000c; }
     $("#ePosterImg").src = URL.createObjectURL(f);
   });
 
+  // Kinescope-ийн зөвхөн Video ID (жишээ нь vuT6rFahTRsG48zZLcbWex) тавьсан бол бүтэн холбоос болгоно
+  function normVideo(raw) {
+    const v = String(raw || "").trim();
+    if (/^[A-Za-z0-9]{12,40}$/.test(v)) return "https://kinescope.io/" + v;
+    if (/^kinescope\.io\//i.test(v)) return "https://" + v;
+    return v;
+  }
   function validVideo(url) {
     if (!url) return true;
     try { const u = new URL(url); return u.protocol === "https:" && /(vimeo\.com|kinescope\.io|mediadelivery\.net)$/.test(u.hostname.replace(/^www\./, "")); } catch { return false; }
@@ -520,9 +527,9 @@ dialog::backdrop { background: #000c; }
     e.preventDefault();
     const msg = $("#eMsg");
     const title = $("#eTitleIn").value.trim();
-    const video = $("#eVideo").value.trim();
+    const video = normVideo($("#eVideo").value);
     if (!title) { msg.className = "msg err"; msg.textContent = "Нэрийг бичнэ үү."; $("#eTitleIn").focus(); return; }
-    const trailer = $("#eTrailer").value.trim();
+    const trailer = normVideo($("#eTrailer").value);
     if (trailer && !validVideo(trailer)) { msg.className = "msg err"; msg.textContent = "Трейлерийн холбоос Kinescope, Bunny эсвэл Vimeo-гийн https хаяг байх ёстой."; return; }
     if (!validVideo(video)) { msg.className = "msg err"; msg.textContent = "Видео холбоос Bunny (mediadelivery.net), Kinescope эсвэл Vimeo-гийн https хаяг байх ёстой."; return; }
     $("#eSave").disabled = true; msg.className = "msg"; msg.textContent = "Хадгалж байна…";
