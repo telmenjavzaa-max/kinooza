@@ -815,9 +815,8 @@ footer .fine { grid-column: 1 / -1; border-top: 1px solid var(--line); padding-t
     let src = embedUrl(playing.url); if (!src) { box.innerHTML = ""; toast("Видеоны холбоос буруу байна"); return; }
     if (/mediadelivery\.net$/.test(new URL(src).hostname)) {
       // Bunny: холбоос хамгаалалттай (token) — серверээс түр гарын үсэгтэй холбоос авна
-      const { data, error } = await sb.functions.invoke("bunny-sign", { body: { url: src } });
-      if (error || !data?.url) { box.innerHTML = ""; toast(data?.error || "Видеог ачаалж чадсангүй. Дахин оролдоно уу."); return; }
-      src = data.url;
+      // Гарын үсэг авч чадаагүй бол (функц/түлхүүр хараахан тохируулаагүй) энгийн холбоосоор тоглуулна
+      try { const { data } = await sb.functions.invoke("bunny-sign", { body: { url: src } }); if (data?.url) src = data.url; } catch {}
     }
     const epId = playing.episode?.id || null;
     const pr = state.progress.get(m.id);
