@@ -76,6 +76,9 @@ nav.main button[aria-current="page"] { background: linear-gradient(180deg, #ff2d
 .menu .access { padding: 0 10px 8px; font-size: 12px; color: var(--ok); }
 .menu button { width: 100%; text-align: left; border: 0; background: none; padding: 9px 10px; border-radius: 9px; font-weight: 500; }
 .menu button:hover { background: var(--surface-2); }
+.menu .menu-admin { display: block; padding: 9px 10px; border-radius: 9px; font-weight: 700; color: var(--brass); text-decoration: none; }
+.menu .menu-admin:hover { background: var(--surface-2); }
+.menu .menu-admin[hidden] { display: none; }
 .catmenu { position: absolute; top: calc(58px + env(safe-area-inset-top, 0px)); width: 260px; background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 8px; z-index: 40; box-shadow: 0 24px 50px -14px #000d; display: grid; grid-template-columns: 1fr 1fr; gap: 4px; }
 .catmenu button { border: 0; background: none; text-align: left; padding: 9px 10px; border-radius: 9px; font-size: 13px; font-weight: 500; }
 .catmenu button:hover { background: var(--surface-2); }
@@ -361,6 +364,7 @@ footer .fine { grid-column: 1 / -1; border-top: 1px solid var(--line); padding-t
   <div class="menu" id="menu" hidden>
     <div class="who" id="who"></div>
     <div class="access" id="access" hidden></div>
+    <a class="menu-admin" id="adminLink" href="admin.html" hidden>⚙️ Админ самбар</a>
     <button data-view="favs">★ Миний жагсаалт</button>
     <button id="menuPlans">Багц сонгох</button>
     <button id="logoutBtn">Гарах</button>
@@ -897,6 +901,7 @@ footer .fine { grid-column: 1 / -1; border-top: 1px solid var(--line); padding-t
     }
     const sub = state.ents.filter((e) => e.movie_id == null).sort((a, b) => b.expires_at.localeCompare(a.expires_at))[0];
     $("#access").hidden = !sub && !state.isAdmin;
+    $("#adminLink").hidden = !state.isAdmin;
     $("#access").textContent = state.isAdmin ? "Админ" : sub ? "Багц: " + new Date(sub.expires_at).toLocaleDateString("mn-MN") + " хүртэл" : "";
   }
   async function loadPlans() {
