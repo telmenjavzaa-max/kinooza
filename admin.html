@@ -67,6 +67,18 @@ td.num { font-family: var(--mono); font-variant-numeric: tabular-nums; }
 .pill.warn { color: var(--warn); border-color: color-mix(in srgb, var(--warn) 45%, transparent); }
 .pill.off { color: var(--muted); }
 .empty { padding: 30px; text-align: center; color: var(--muted); }
+.rev-box { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 16px; }
+.rev-head { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; margin-bottom: 6px; }
+.rev-head h2 { margin: 0; font-family: var(--display); font-size: 18px; font-weight: 600; flex: 1; }
+.seg { display: inline-flex; gap: 4px; }
+.seg button { border: 1px solid var(--line); background: var(--bg); color: var(--muted); padding: 5px 12px; border-radius: 6px; font-weight: 600; font-size: 13px; }
+.seg button[aria-pressed="true"] { background: var(--brass); color: var(--brass-ink); border-color: var(--brass); }
+.rev-sum { font-size: 12px; color: var(--muted); margin: 0 0 12px; } .rev-sum b { color: var(--fg); }
+.rev-box table { min-width: 640px; } .rev-box th, .rev-box td { background: transparent; }
+td.r, th.r { text-align: right; }
+.bar { display: inline-block; height: 6px; border-radius: 3px; background: var(--brass); vertical-align: middle; min-width: 2px; }
+.dow { color: var(--muted); font-size: 12px; margin-left: 4px; }
+.stat.hl .v { color: var(--brass); }
 
 .plans { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 14px; }
 .plan-card { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 18px; display: grid; gap: 12px; }
@@ -141,6 +153,7 @@ dialog::backdrop { background: #000c; }
     <nav class="tabs" role="tablist">
       <button class="tab" role="tab" data-tab="movies" aria-selected="true">Кино, цуврал</button>
       <button class="tab" role="tab" data-tab="plans" aria-selected="false">Багц</button>
+      <button class="tab" role="tab" data-tab="revenue" aria-selected="false">Орлого</button>
       <button class="tab" role="tab" data-tab="payments" aria-selected="false">Төлбөр</button>
       <button class="tab" role="tab" data-tab="users" aria-selected="false">Хэрэглэгчид</button>
       <button class="tab" role="tab" data-tab="admins" aria-selected="false">Админууд</button>
@@ -186,6 +199,25 @@ dialog::backdrop { background: #000c; }
         <thead><tr><th>Имэйл</th><th>Төлөв</th><th>Нэмсэн</th><th></th></tr></thead>
         <tbody id="adminRows"></tbody>
       </table></div>
+    </section>
+
+    <section id="tab-revenue" hidden>
+      <div class="stats" id="revStats"></div>
+      <div class="rev-box">
+        <div class="rev-head">
+          <h2>Өдөр бүрийн орлого</h2>
+          <div class="seg" id="revSeg" role="group" aria-label="Хугацаа">
+            <button type="button" data-d="7" aria-pressed="false">7 хоног</button>
+            <button type="button" data-d="30" aria-pressed="true">30 хоног</button>
+            <button type="button" data-d="90" aria-pressed="false">90 хоног</button>
+          </div>
+        </div>
+        <p class="rev-sum" id="revSum"></p>
+        <div class="table-wrap" style="border:0"><table>
+          <thead><tr><th>Огноо</th><th class="r">Захиалга</th><th class="r">Кино (түрээс)</th><th class="r">Багц</th><th class="r">Нийт</th><th style="width:30%"></th></tr></thead>
+          <tbody id="revRows"></tbody>
+        </table></div>
+      </div>
     </section>
 
     <section id="tab-payments" hidden>
@@ -350,7 +382,8 @@ dialog::backdrop { background: #000c; }
   // ---------- Таб ----------
   document.querySelectorAll(".tab").forEach((t) => t.addEventListener("click", () => {
     document.querySelectorAll(".tab").forEach((x) => x.setAttribute("aria-selected", x === t));
-    ["movies", "plans", "payments", "users", "admins"].forEach((n) => ($("#tab-" + n).hidden = n !== t.dataset.tab));
+    ["movies", "plans", "revenue", "payments", "users", "admins"].forEach((n) => ($("#tab-" + n).hidden = n !== t.dataset.tab));
+    if (t.dataset.tab === "revenue") loadRevenue();
     if (t.dataset.tab === "payments") loadPayments();
     if (t.dataset.tab === "users") loadUsers();
     if (t.dataset.tab === "admins") loadAdmins();
@@ -766,6 +799,45 @@ dialog::backdrop { background: #000c; }
     if (error) { toast("Хадгалж чадсангүй: " + error.message); return; }
     toast("Хадгалагдлаа"); loadPlans();
   });
+
+  // ---------- Орлого (өдөр бүрээр, Улаанбаатарын цагаар) ----------
+  let revData = [], revDays = 30;
+  const DOW = ["Ня", "Да", "Мя", "Лх", "Пү", "Ба", "Бя"];
+  async function loadRevenue() {
+    const { data, error } = await sb.rpc("admin_revenue_daily", { p_days: 90 });
+    if (error) { toast("Орлого ачаалж чадсангүй: " + error.message); return; }
+    revData = data || [];
+    const sumBy = (n) => revData.slice(0, n).reduce((s, r) => s + Number(r.total), 0);
+    const today = revData[0]?.day || "";
+    const monthKey = today.slice(0, 7);
+    const month = revData.filter((r) => r.day.slice(0, 7) === monthKey).reduce((s, r) => s + Number(r.total), 0);
+    $("#revStats").innerHTML = [
+      ["Өнөөдөр", sumBy(1), true], ["Өчигдөр", Number(revData[1]?.total || 0)], ["Сүүлийн 7 хоног", sumBy(7)], ["Энэ сар", month],
+    ].map(([k, v, hl]) => `<div class="stat${hl ? " hl" : ""}"><div class="k">${k}</div><div class="v">${fmt(v)}</div></div>`).join("");
+    renderRevenue();
+  }
+  function renderRevenue() {
+    const rows = revData.slice(0, revDays);
+    const total = rows.reduce((s, r) => s + Number(r.total), 0);
+    const max = Math.max(1, ...rows.map((r) => Number(r.total)));
+    $("#revSum").innerHTML = `Нийт: <b>${fmt(total)}</b> · Өдрийн дундаж: <b>${fmt(Math.round(total / Math.max(1, rows.length)))}</b> · Зөвхөн төлөгдсөн захиалга, төлөгдсөн өдрөөр (Улаанбаатарын цагаар).`;
+    $("#revRows").innerHTML = rows.map((r) => {
+      const d = new Date(r.day + "T00:00:00");
+      return `<tr>
+        <td class="num">${r.day.slice(5).replace("-", "/")}<span class="dow">${DOW[d.getDay()]}</span></td>
+        <td class="num r">${r.orders}</td>
+        <td class="num r">${r.rent_count} · ${fmt(r.rent_sum)}</td>
+        <td class="num r">${r.sub_count} · ${fmt(r.sub_sum)}</td>
+        <td class="num r" style="color:var(--brass);font-weight:600">${fmt(r.total)}</td>
+        <td><span class="bar" style="width:${Number(r.total) ? Math.max(2, Math.round(Number(r.total) / max * 100)) : 0}%"></span></td>
+      </tr>`;
+    }).join("") || `<tr><td colspan="6" class="empty">Мэдээлэл алга.</td></tr>`;
+  }
+  document.querySelectorAll("#revSeg button").forEach((b) => b.addEventListener("click", () => {
+    revDays = Number(b.dataset.d);
+    document.querySelectorAll("#revSeg button").forEach((x) => x.setAttribute("aria-pressed", x === b));
+    renderRevenue();
+  }));
 
   // ---------- Төлбөр ----------
   async function loadPayments() {
