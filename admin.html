@@ -79,6 +79,10 @@ td.r, th.r { text-align: right; }
 .bar { display: inline-block; height: 6px; border-radius: 3px; background: var(--brass); vertical-align: middle; min-width: 2px; }
 .dow { color: var(--muted); font-size: 12px; margin-left: 4px; }
 .stat.hl .v { color: var(--brass); }
+.top-list { list-style: none; margin: 4px 0 0; padding: 0; display: grid; gap: 6px; }
+.top-list li { display: flex; gap: 12px; justify-content: space-between; font-size: 14px; }
+.top-list li span:first-child { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.top-list .n { font-family: var(--mono); color: var(--brass); font-variant-numeric: tabular-nums; }
 
 .plans { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 14px; }
 .plan-card { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 18px; display: grid; gap: 12px; }
@@ -151,7 +155,8 @@ dialog::backdrop { background: #000c; }
 
   <div id="app" hidden>
     <nav class="tabs" role="tablist">
-      <button class="tab" role="tab" data-tab="movies" aria-selected="true">Кино, цуврал</button>
+      <button class="tab" role="tab" data-tab="overview" aria-selected="true">Хяналт</button>
+      <button class="tab" role="tab" data-tab="movies" aria-selected="false">Кино, цуврал</button>
       <button class="tab" role="tab" data-tab="plans" aria-selected="false">Багц</button>
       <button class="tab" role="tab" data-tab="revenue" aria-selected="false">Орлого</button>
       <button class="tab" role="tab" data-tab="payments" aria-selected="false">Төлбөр</button>
@@ -159,7 +164,15 @@ dialog::backdrop { background: #000c; }
       <button class="tab" role="tab" data-tab="admins" aria-selected="false">Админууд</button>
     </nav>
 
-    <section id="tab-movies">
+    <section id="tab-overview">
+      <div class="stats" id="ovStats"></div>
+      <div class="rev-box">
+        <div class="rev-head"><h2>Хамгийн их түрээслэгдсэн</h2></div>
+        <ol class="top-list" id="ovTop"></ol>
+      </div>
+    </section>
+
+    <section id="tab-movies" hidden>
       <div class="toolbar">
         <input id="mq" type="search" placeholder="Кино, цуврал хайх…" aria-label="Хайх">
         <select id="mkind" aria-label="Төрөл" style="padding:9px 12px;border-radius:8px;border:1px solid var(--line);background:var(--surface)"><option value="">Бүгд</option><option value="movie">Кино</option><option value="series">Цуврал</option></select>
@@ -376,13 +389,14 @@ dialog::backdrop { background: #000c; }
     const { data: isAdmin, error } = await sb.rpc("is_admin");
     if (error || !isAdmin) return gate("Эрх хүрэлцэхгүй", "Энэ аккаунтад админ эрх байхгүй байна.", false);
     $("#gate").hidden = true; $("#app").hidden = false;
-    await Promise.all([loadMovies(), loadPlans()]);
+    await Promise.all([loadOverview(), loadMovies(), loadPlans()]);
   }
 
   // ---------- Таб ----------
   document.querySelectorAll(".tab").forEach((t) => t.addEventListener("click", () => {
     document.querySelectorAll(".tab").forEach((x) => x.setAttribute("aria-selected", x === t));
-    ["movies", "plans", "revenue", "payments", "users", "admins"].forEach((n) => ($("#tab-" + n).hidden = n !== t.dataset.tab));
+    ["overview", "movies", "plans", "revenue", "payments", "users", "admins"].forEach((n) => ($("#tab-" + n).hidden = n !== t.dataset.tab));
+    if (t.dataset.tab === "overview") loadOverview();
     if (t.dataset.tab === "revenue") loadRevenue();
     if (t.dataset.tab === "payments") loadPayments();
     if (t.dataset.tab === "users") loadUsers();
@@ -799,6 +813,17 @@ dialog::backdrop { background: #000c; }
     if (error) { toast("Хадгалж чадсангүй: " + error.message); return; }
     toast("Хадгалагдлаа"); loadPlans();
   });
+
+  // ---------- Хяналт ----------
+  async function loadOverview() {
+    const { data, error } = await sb.rpc("admin_overview");
+    if (error) { toast("Хяналт ачаалж чадсангүй: " + error.message); return; }
+    const o = data || {};
+    $("#ovStats").innerHTML = [["Өнөөдрийн орлого", fmt(o.today), true], ["Хүлээгдэж буй захиалга", Number(o.pending || 0).toLocaleString("en-US")], ["Нийт баталгаажсан", Number(o.paid || 0).toLocaleString("en-US")]]
+      .map(([k, v, hl]) => `<div class="stat${hl ? " hl" : ""}"><div class="k">${k}</div><div class="v">${v}</div></div>`).join("");
+    const top = o.top || [];
+    $("#ovTop").innerHTML = top.length ? top.map((t, i) => `<li><span>${i + 1}. ${esc(t.title)}</span><span class="n">${Number(t.n).toLocaleString("en-US")}</span></li>`).join("") : `<li class="empty">Одоогоор түрээс алга.</li>`;
+  }
 
   // ---------- Орлого (өдөр бүрээр, Улаанбаатарын цагаар) ----------
   let revData = [], revDays = 30;
