@@ -954,7 +954,7 @@ footer .fine { grid-column: 1 / -1; border-top: 1px solid var(--line); padding-t
       <div style="display:grid;justify-items:center;gap:10px">${data.qr_image ? `<img src="data:image/png;base64,${data.qr_image}" alt="QPay QR" style="width:min(240px,100%);background:#fff;border-radius:12px;padding:10px">` : ""}<span class="note">Банкны апп-аараа QR кодыг уншуулна уу</span></div>
       ${data.urls?.length ? `<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(64px,1fr));gap:10px">${data.urls.map((u) => `<a href="${esc(u.link)}" style="display:grid;justify-items:center;gap:4px;text-decoration:none;color:var(--muted);font-size:10px;text-align:center"><img src="${esc(u.logo)}" alt="" loading="lazy" style="width:44px;height:44px;border-radius:10px;background:#fff">${esc(u.name)}</a>`).join("")}</div>` : ""}
       <div class="note" id="payState">Төлбөр хүлээж байна…</div><button class="btn primary wide" id="checkPay">Төлсөн — шалгах</button>`;
-    state.pay = { id: data.payment_id, movieId, plan, amount: data.amount, until: Date.now() + 6e5 };
+    state.pay = { id: data.payment_id, movieId, plan, amount: data.amount, hidden: !!data.hidden, until: Date.now() + 6e5 };
     $("#checkPay").addEventListener("click", () => checkPay(true));
     state.payTimer = setInterval(() => checkPay(false), 3000);
   }
@@ -964,7 +964,7 @@ footer .fine { grid-column: 1 / -1; border-top: 1px solid var(--line); padding-t
     let paid = false;
     if (manual) { const { data } = await sb.functions.invoke("qpay", { body: { action: "check", payment_id: p.id } }); paid = data?.status === "paid"; if (!paid) $("#payState").textContent = "Төлбөр хараахан ороогүй байна."; }
     else { const { data } = await sb.from("payments").select("status").eq("id", p.id).maybeSingle(); paid = data?.status === "paid"; }
-    if (paid) { stopPolling(); $("#payDlg").close(); toast("Төлбөр амжилттай. Сайхан үзээрэй!"); track("Purchase", { value: Number(p.amount) || 0, currency: "MNT" }, { eventID: p.id }); await loadAccess(); if (p.movieId) play(p.movieId); }
+    if (paid) { stopPolling(); $("#payDlg").close(); toast("Төлбөр амжилттай. Сайхан үзээрэй!"); !p.hidden && track("Purchase", { value: Number(p.amount) || 0, currency: "MNT" }, { eventID: p.id }); await loadAccess(); if (p.movieId) play(p.movieId); }
   }
   function stopPolling() { clearInterval(state.payTimer); state.payTimer = null; }
 
