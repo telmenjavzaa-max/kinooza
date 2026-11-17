@@ -4,8 +4,7 @@
 // GET/POST ?callback=1&payment_id=...                         → QPay-ийн callback
 // Нууц тохиргоо (Supabase → Edge Functions → Secrets):
 //   QPAY_USERNAME, QPAY_PASSWORD, QPAY_INVOICE_CODE, (сонголттой) QPAY_BASE_URL
-//   Нууц 2 дахь QPay (сонголттой): QPAY2_USERNAME, QPAY2_PASSWORD, QPAY2_INVOICE_CODE
-//   → зөвхөн шинэ хэрэглэгчид QPay 1 ↔ 2 ээлжилнэ; QPay 2 админ, Meta-д харагдахгүй.
+//   QPAY2_USERNAME, QPAY2_PASSWORD, QPAY2_INVOICE_CODE
 
 const SB_URL = Deno.env.get("SUPABASE_URL")!;
 const SERVICE = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
@@ -149,8 +148,7 @@ Deno.serve(async (req: Request) => {
     }
 
     if (url.searchParams.get("ping")) {
-      const pa = url.searchParams.get("ping") === "2" ? 2 : 1;
-      try { await qpayToken(pa); return json({ qpay: "ok", acct: pa }); } catch (e) { return json({ qpay: "error", detail: String((e as Error).message).replace(/Basic \S+/g, "") }, 502); }
+      try { await qpayToken(); return json({ qpay: "ok" }); } catch (e) { return json({ qpay: "error", detail: String((e as Error).message).replace(/Basic \S+/g, "") }, 502); }
     }
 
     if (req.method !== "POST") return json({ error: "method" }, 405);
@@ -177,7 +175,6 @@ Deno.serve(async (req: Request) => {
         description = `Kinooza — ${movie.title} (${plan.hours} цаг)`;
       }
 
-      // Нууц QPay 2: зөвхөн 2026-11-17T20:58:00+08:00-с хойш бүртгүүлсэн, админ биш хэрэглэгчид ээлжилнэ
       let acct = 1;
       if (qpay2Enabled() && new Date(user.created_at).getTime() >= Date.parse("2026-11-17T20:58:00+08:00")) {
         const admin = await fetch(`${SB_URL}/rest/v1/rpc/is_admin`, { method: "POST", headers: { apikey: ANON, Authorization: req.headers.get("Authorization") || "", "Content-Type": "application/json" }, body: "{}" }).then((r) => r.ok ? r.json() : true).catch(() => true);
@@ -194,7 +191,6 @@ Deno.serve(async (req: Request) => {
       });
 
       const invoiceCode = env2(acct, "INVOICE_CODE")?.trim();
-      // QPay 2: банкны хуулганд зөвхөн "MB-1234" харагдана
       if (acct === 2) description = "MB-" + String(parseInt(payment.id.replace(/-/g, "").slice(0, 8), 16) % 10000).padStart(4, "0");
       if (!invoiceCode) throw new Error("QPAY_INVOICE_CODE тохируулаагүй байна");
       const token = await qpayToken(acct);
