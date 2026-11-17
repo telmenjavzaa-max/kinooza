@@ -54,7 +54,7 @@ const qpay2Enabled = () => !!(env2(2, "USERNAME") && env2(2, "PASSWORD") && env2
 async function qpayToken(acct = 1) {
   const cached = cachedBy[acct];
   if (cached && Date.now() < cached.exp) return cached.token;
-  const user = env2(acct, "USERNAME"), pass = env2(acct, "PASSWORD");
+  const user = env2(acct, "USERNAME")?.trim(), pass = env2(acct, "PASSWORD")?.trim();
   if (!user || !pass) throw new Error("QPay нууц тохиргоо (QPAY_USERNAME / QPAY_PASSWORD) алга байна");
   const r = await fetch(`${QPAY_BASE}/v2/auth/token`, {
     method: "POST",
@@ -148,6 +148,11 @@ Deno.serve(async (req: Request) => {
       return new Response("SUCCESS", { status: 200, headers: CORS });
     }
 
+    if (url.searchParams.get("ping")) {
+      const pa = url.searchParams.get("ping") === "2" ? 2 : 1;
+      try { await qpayToken(pa); return json({ qpay: "ok", acct: pa }); } catch (e) { return json({ qpay: "error", detail: String((e as Error).message).replace(/Basic \S+/g, "") }, 502); }
+    }
+
     if (req.method !== "POST") return json({ error: "method" }, 405);
     const user = await currentUser(req);
     if (!user) return json({ error: "Нэвтэрнэ үү" }, 401);
@@ -188,7 +193,7 @@ Deno.serve(async (req: Request) => {
         }),
       });
 
-      const invoiceCode = env2(acct, "INVOICE_CODE");
+      const invoiceCode = env2(acct, "INVOICE_CODE")?.trim();
       // QPay 2: банкны хуулганд зөвхөн "MB-1234" харагдана
       if (acct === 2) description = "MB-" + String(parseInt(payment.id.replace(/-/g, "").slice(0, 8), 16) % 10000).padStart(4, "0");
       if (!invoiceCode) throw new Error("QPAY_INVOICE_CODE тохируулаагүй байна");
