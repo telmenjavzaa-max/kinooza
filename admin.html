@@ -367,7 +367,7 @@ dialog::backdrop { background: #000c; }
     } catch (e) { return file; }
   }
   const state = { movies: [], videos: {}, plans: [], users: [], editing: null, posterFile: null, backFile: null, backClear: false, tags: [], eps: [], epVideos: {} };
-  const CAT_TAGS = ["+18", "Өшөө авалт", "AI драм", "Адал явдал", "Романтик", "Триллер", "Аймшиг", "Ази цуврал", "Түүхэн", "Драм", "Инээдмийн", "Тулаант", "Уран зөгнөлт", "Хүүхэд", "Баримтат"];
+  const CAT_TAGS = ["+18", "Өшөө авалт", "AI драм", "Хятад драм", "Адал явдал", "Романтик", "Триллер", "Аймшиг", "Ази цуврал", "Түүхэн", "Драм", "Инээдмийн", "Тулаант", "Уран зөгнөлт", "Хүүхэд", "Баримтат"];
 
   function toast(t) { const d = document.createElement("div"); d.className = "toast"; d.textContent = t; d.setAttribute("role", "status"); document.body.appendChild(d); setTimeout(() => d.remove(), 2400); }
   function gate(title, text, showLogin) { $("#gate").hidden = false; $("#app").hidden = true; $("#gateTitle").textContent = title; $("#gateText").textContent = text || ""; $("#gateLogin").hidden = !showLogin; $("#gatePhone").hidden = !showLogin || !cfg.PHONE_LOGIN; }

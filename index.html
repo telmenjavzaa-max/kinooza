@@ -570,17 +570,11 @@ footer .fine { grid-column: 1 / -1; border-top: 1px solid var(--line); padding-t
     grid: '<rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/>',
   };
   const CATS = [
-    { key: "new", label: "Шинээр нэмэгдсэн", icon: "fire", c: "#ff4d4d" },
-    { key: "series", label: "Цуврал", icon: "tv", c: "#3b82f6" },
-    { key: "Адал явдал", label: "Адал явдал", icon: "compass", c: "#a855f7" },
-    { key: "Романтик", label: "Романтик", icon: "heart", c: "#ec4899" },
-    { key: "Триллер", label: "Триллер", icon: "mask", c: "#8b5cf6" },
-    { key: "Аймшиг", label: "Аймшиг", icon: "ghost", c: "#94a3b8" },
-    { key: "Ази цуврал", label: "Ази цуврал", icon: "lotus", c: "#d946ef" },
-    { key: "Өшөө авалт", label: "Өшөө авалт", icon: "mask", c: "#ef4444" },
     { key: "AI драм", label: "AI драм", icon: "fire", c: "#22d3ee" },
-    { key: "+18", label: "+18", icon: "heart", c: "#f43f5e" },
-    { key: "all", label: "Бүх ангилал", icon: "grid", c: "#38bdf8" },
+    { key: "Хятад драм", label: "Хятад драм", icon: "lotus", c: "#d946ef" },
+    { key: "Өшөө авалт", label: "Өшөө авалт", icon: "mask", c: "#ef4444" },
+    { key: "Тулаант", label: "Тулаант", icon: "compass", c: "#f59e0b" },
+    { key: "+18", label: "Насанд хүрэгчид", icon: "heart", c: "#f43f5e" },
   ];
   const svg = (k) => `<svg viewBox="0 0 24 24" aria-hidden="true">${ICON[k]}</svg>`;
   const tagsOf = (m) => [m.genre, ...(m.tags || [])].filter(Boolean);
