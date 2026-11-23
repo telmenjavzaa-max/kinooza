@@ -139,6 +139,8 @@ nav.mob { display: none; }
 
 .card { background: none; border: 0; padding: 0; text-align: left; display: flex; flex-direction: column; gap: 9px; min-width: 0; }
 .poster { position: relative; aspect-ratio: 2 / 3; width: 100%; border-radius: var(--radius); overflow: hidden; background: linear-gradient(160deg, hsl(var(--h1) 60% 32%), hsl(var(--h2) 55% 12%)); display: flex; flex-direction: column; justify-content: center; padding: 12px; isolation: isolate; box-shadow: 0 0 0 1px #ffffff10; transition: transform .25s ease, box-shadow .25s ease; }
+.poster.adult img { filter: blur(18px) brightness(.7); transform: scale(1.15); }
+.poster .age18 { position: absolute; top: 8px; right: 8px; z-index: 3; background: #e11d48; color: #fff; font-weight: 800; font-size: 11px; padding: 3px 7px; border-radius: 6px; }
 .poster img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; z-index: 1; transition: transform .45s ease; }
 .card:hover .poster, .card:focus-visible .poster { transform: translateY(-3px); box-shadow: 0 0 0 1px #ff2d5566, 0 18px 34px -16px #000; }
 .card:hover .poster img { transform: scale(1.05); }
@@ -540,6 +542,9 @@ footer .fine { grid-column: 1 / -1; border-top: 1px solid var(--line); padding-t
     { key: "Триллер", label: "Триллер", icon: "mask", c: "#8b5cf6" },
     { key: "Аймшиг", label: "Аймшиг", icon: "ghost", c: "#94a3b8" },
     { key: "Ази цуврал", label: "Ази цуврал", icon: "lotus", c: "#d946ef" },
+    { key: "Өшөө авалт", label: "Өшөө авалт", icon: "mask", c: "#ef4444" },
+    { key: "AI драм", label: "AI драм", icon: "fire", c: "#22d3ee" },
+    { key: "+18", label: "+18", icon: "heart", c: "#f43f5e" },
     { key: "all", label: "Бүх ангилал", icon: "grid", c: "#38bdf8" },
   ];
   const svg = (k) => `<svg viewBox="0 0 24 24" aria-hidden="true">${ICON[k]}</svg>`;
@@ -558,12 +563,19 @@ footer .fine { grid-column: 1 / -1; border-top: 1px solid var(--line); padding-t
   const dur = (r) => { r = +r || 0; const h = Math.floor(r / 60), mm = r % 60; return h ? `${h} цаг${mm ? ` ${mm} мин` : ""}` : `${mm} мин`; };
   const meta = (m) => [m.year, m.kind === "series" ? (m.ep_count ? `${m.ep_count} анги` : "Цуврал") : (m.runtime ? dur(m.runtime) : "")].filter(Boolean).join(" · ");
   const playIc = '<svg viewBox="0 0 24 24"><path d="M7 4v16l13-8z"/></svg>';
+  const isAdult = (m) => tagsOf(m).some((t) => /18/.test(t)) || /18/.test(m?.age_rating || "");
+  const adultOK = () => store.get("kz.adult", false) === true;
+  function confirmAge() {
+    if (adultOK()) return true;
+    if (!confirm("Энэ кино 18 наснаас дээш хүнд зориулагдсан. Та 18 нас хүрсэн үү?")) return false;
+    store.set("kz.adult", true); try { render(); } catch {} return true;
+  }
   function posterHTML(m, withBadges = true, priority = false) {
     const badge = !withBadges ? "" : !m.has_video ? `<span class="badge soon">Удахгүй</span>` : isNew(m) ? `<span class="badge">Шинэ</span>` : "";
-    return `<div class="poster" style="--h1:${+m.hue1 || 340};--h2:${+m.hue2 || 260}">
+    return `<div class="poster${isAdult(m) && !adultOK() ? " adult" : ""}" style="--h1:${+m.hue1 || 340};--h2:${+m.hue2 || 260}">
       <div class="p-title">${esc(m.title)}</div>
       ${m.poster_url ? `<img src="${esc(m.poster_url)}" alt="" width="400" height="600" ${priority ? 'fetchpriority="high"' : 'loading="lazy"'} decoding="async" onerror="this.remove()">` : ""}
-      ${badge}
+      ${badge}${isAdult(m) ? `<span class="age18">18+</span>` : ""}
       ${withBadges ? `<div class="play"><i>${playIc}</i></div>` : ""}
       ${withBadges && meta(m) ? `<div class="info">${esc(meta(m))}</div>` : ""}
     </div>`;
@@ -612,7 +624,7 @@ footer .fine { grid-column: 1 / -1; border-top: 1px solid var(--line); padding-t
   const byTop = (a, b) => (b.views || 0) - (a.views || 0) || byNew(a, b);
   const BRAND_IMG = (cfg.SUPABASE_URL || "") + "/storage/v1/object/public/posters/demo/kinooza-hero.jpg";
   function heroItems() {
-    return [{ id: "brand", brand: true, poster_url: BRAND_IMG }].concat([...state.movies].filter((m) => m.backdrop_url || m.poster_url).sort((a, b) => (b.featured === true) - (a.featured === true) || byNew(a, b)).slice(0, 6));
+    return [{ id: "brand", brand: true, poster_url: BRAND_IMG }].concat([...state.movies].filter((m) => (m.backdrop_url || m.poster_url) && !isAdult(m)).sort((a, b) => (b.featured === true) - (a.featured === true) || byNew(a, b)).slice(0, 6));
   }
   function renderHero() {
     const items = heroItems();
@@ -725,6 +737,7 @@ footer .fine { grid-column: 1 / -1; border-top: 1px solid var(--line); padding-t
   // ---------- Дэлгэрэнгүй ----------
   async function openMovie(id, playing = null) {
     const m = state.movies.find((x) => x.id === id); if (!m) return;
+    if (isAdult(m) && !confirmAge()) return;
     if (!playing) track("ViewContent", { content_ids: [String(m.id)], content_name: m.title, content_type: "product" });
     state.current = m;
     const eps = m.kind === "series" ? await loadEpisodes(m.id) : [];
@@ -855,6 +868,7 @@ footer .fine { grid-column: 1 / -1; border-top: 1px solid var(--line); padding-t
 
   async function play(id) {
     const m = state.movies.find((x) => x.id === id); if (!m || !m.has_video) return;
+    if (isAdult(m) && !confirmAge()) return;
     if (m.kind === "series") {
       const eps = await loadEpisodes(id); const pr = state.progress.get(id);
       const ep = (pr?.episode_id && eps.find((e) => e.id === pr.episode_id)) || eps[0];
