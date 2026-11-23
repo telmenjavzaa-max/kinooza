@@ -599,7 +599,9 @@ footer .fine { grid-column: 1 / -1; border-top: 1px solid var(--line); padding-t
   const meta = (m) => [m.year, m.kind === "series" ? (m.ep_count ? `${m.ep_count} анги` : "Цуврал") : (m.runtime ? dur(m.runtime) : "")].filter(Boolean).join(" · ");
   const playIc = '<svg viewBox="0 0 24 24"><path d="M7 4v16l13-8z"/></svg>';
   const isAdult = (m) => tagsOf(m).some((t) => /18/.test(t)) || /18/.test(m?.age_rating || "");
-  const adultOK = () => store.get("kz.adult", false) === true;
+  // 18+ баталгаажуулалт зөвхөн тухайн табын хугацаанд хүчинтэй (таб хаагдвал дахин асууна)
+  try { localStorage.removeItem("kz.adult"); } catch {}
+  const adultOK = () => { try { return sessionStorage.getItem("kz.adult18") === "1"; } catch { return false; } };
   let ageNext = null;
   function confirmAge(next) {
     if (adultOK()) return true;
@@ -608,7 +610,7 @@ footer .fine { grid-column: 1 / -1; border-top: 1px solid var(--line); padding-t
     return false;
   }
   $("#ageYes").addEventListener("click", () => {
-    store.set("kz.adult", true); $("#ageDlg").close(); try { render(); } catch {}
+    try { sessionStorage.setItem("kz.adult18", "1"); } catch {} $("#ageDlg").close(); try { render(); } catch {}
     const n = ageNext; ageNext = null; if (n) n();
   });
   $("#ageNo").addEventListener("click", () => { ageNext = null; $("#ageDlg").close(); });
