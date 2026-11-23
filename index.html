@@ -713,17 +713,20 @@ footer .fine { grid-column: 1 / -1; border-top: 1px solid var(--line); padding-t
   function renderRows() {
     $("#homeView").appendChild($("#promo")); // дахин зурахад баннер устахгүй
     const all = state.movies;
+    // 18+ (бүдгэрсэн) кинонуудыг эгнээ бүрийн төгсгөлд харуулна
+    const adultLast = (l) => [...l.filter((m) => !isAdult(m)), ...l.filter((m) => isAdult(m))];
     const cont = [...state.progress.values()].map((r) => all.find((m) => m.id === r.movie_id)).filter((m) => m && m.has_video);
     let html = cont.length ? rowHTML("Үргэлжлүүлж үзэх", cont, null, "resume") : "";
-    html += rowHTML("Шинээр нэмэгдсэн", [...all].sort(byNew).slice(0, 20), "new");
-    html += rowHTML("Трейлер", all.filter((m) => m.trailer_url).sort(byNew).slice(0, 20), null, "trailer");
+    const newest = [...all].sort(byNew);
+    html += rowHTML("Шинээр нэмэгдсэн", [...newest.filter((m) => !isAdult(m)).slice(0, 16), ...newest.filter((m) => isAdult(m)).slice(0, 4)], "new");
+    html += rowHTML("Трейлер", adultLast(all.filter((m) => m.trailer_url).sort(byNew).slice(0, 20)), null, "trailer");
     const top = [...all].filter((m) => m.views > 0).sort(byTop).slice(0, 10);
-    html += rowHTML("Топ үзэлттэй", top.length >= 3 ? top : [...all].sort(byTop).slice(0, 10), "top", "top");
+    html += rowHTML("Топ үзэлттэй", adultLast(top.length >= 3 ? top : [...all].sort(byTop).slice(0, 10)), "top", "top");
     html += '<div id="promoSlot"></div>';
-    html += rowHTML("Цуврал", all.filter((m) => m.kind === "series").sort(byNew), "series");
+    html += rowHTML("Цуврал", adultLast(all.filter((m) => m.kind === "series").sort(byNew)), "series");
     if (state.user && state.favs.size) html += rowHTML("Миний жагсаалт", all.filter((m) => state.favs.has(m.id)), "favs");
     CATS.filter((c) => !["new", "series", "all"].includes(c.key)).forEach((c) => {
-      const l = all.filter((m) => matchCat(m, c.key)); if (l.length >= 3) html += rowHTML(c.label, l.sort(byNew), "cat:" + c.key);
+      const l = all.filter((m) => matchCat(m, c.key)); if (l.length >= 3) html += rowHTML(c.label, adultLast(l.sort(byNew)), "cat:" + c.key);
     });
     if (!all.length) html = `<div class="empty" style="margin-top:30px">Удахгүй шинэ кино, цуврал нэмэгдэнэ.</div><div id="promoSlot"></div>`;
     $("#rows").innerHTML = html;
