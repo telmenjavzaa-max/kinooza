@@ -1,0 +1,36 @@
+name: shrink-posters
+on:
+  workflow_dispatch:
+  push:
+    paths: ["posters/list.tsv"]
+permissions:
+  contents: write
+jobs:
+  shrink:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Download and compress
+        run: |
+          pip install --quiet pillow
+          python3 - <<'PY'
+          import io, urllib.request
+          from PIL import Image
+          for line in open("posters/list.tsv", encoding="utf-8"):
+              line = line.strip()
+              if not line: continue
+              mid, url = line.split("\t", 1)
+              data = urllib.request.urlopen(url, timeout=60).read()
+              im = Image.open(io.BytesIO(data)).convert("RGB")
+              if im.width > 600:
+                  im = im.resize((600, round(im.height * 600 / im.width)), Image.LANCZOS)
+              im.save(f"posters/m{mid}.jpg", "JPEG", quality=80, optimize=True, progressive=True)
+              print(mid, len(data)//1024, "KB ->", len(open(f"posters/m{mid}.jpg","rb").read())//1024, "KB")
+          PY
+      - name: Commit
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add posters/*.jpg
+          git commit -m "Постеруудыг шахаж репод хадгалав" || echo "no changes"
+          git push
