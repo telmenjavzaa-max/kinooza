@@ -192,6 +192,35 @@ main { padding-bottom: 56px; }
 
 /* ---------- Цонхнууд ---------- */
 dialog { border: 1px solid var(--line); background: var(--bg-2); color: var(--fg); border-radius: 18px; padding: 0; width: min(900px, calc(100vw - 24px)); max-height: calc(100vh - 32px); }
+/* Багцын карт (+18 тусдаа багц) */
+#payDlg.wide { width: min(1120px, calc(100vw - 24px)); }
+.pk-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 14px; }
+.pk { --gold: #f0b860; display: grid; gap: 3px; align-content: start; text-align: left; width: 100%; padding: 18px 18px 16px; border-radius: 14px; border: 1px solid #3a2a22; background: #1c1411; color: var(--fg); cursor: pointer; }
+.pk:hover:not([disabled]) { border-color: var(--gold); }
+.pk[disabled] { opacity: .75; cursor: default; }
+.pk.hot { border-color: var(--gold); box-shadow: 0 0 0 1px var(--gold), 0 0 30px -6px #f0b86088; }
+.pk .chips { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 6px; }
+.pk .chip { font-size: 11px; font-weight: 700; padding: 3px 10px; border-radius: 99px; background: var(--gold); color: #1a1208; }
+.pk .chip.o { background: transparent; border: 1px solid var(--gold); color: var(--gold); }
+.pk b { font-size: 20px; font-weight: 600; }
+.pk .sub { font-size: 12px; color: var(--muted); }
+.pk .pr { font-size: 30px; font-weight: 700; color: var(--gold); margin-top: 8px; line-height: 1.15; }
+.pk .pr s { font-size: 14px; color: var(--muted); font-weight: 500; margin-left: 8px; }
+.pk small { font-size: 12.5px; color: var(--muted); }
+.pk-18 { display: flex; align-items: center; gap: 10px; margin: 12px 0 0; font-size: 22px; }
+.b18 { display: inline-grid; place-items: center; padding: 4px 12px; border-radius: 99px; background: linear-gradient(90deg, #ff1f8f, #ff7a3d); color: #fff; font-size: 14px; font-weight: 800; }
+.pk-note { color: var(--muted); font-size: 13.5px; max-width: 620px; margin: 0; }
+.pk-one { display: grid; gap: 4px; padding: 16px 18px; border-radius: 14px; background: #1c1411; border: 1px solid #2a1f1a; }
+.pk-one b { font-size: 19px; font-weight: 600; }
+/* Нас баталгаажуулах цонх */
+#ageDlg { width: min(560px, calc(100vw - 32px)); }
+.age { padding: 36px 28px 32px; text-align: center; display: grid; justify-items: center; gap: 12px; }
+.age-ic { width: 64px; height: 64px; border-radius: 50%; display: grid; place-items: center; background: linear-gradient(135deg, #ff1f8f, #ff8a3d); font-weight: 800; font-size: 20px; color: #fff; }
+.age h2 { font-size: 28px; margin: 4px 0 0; }
+.age p { color: var(--muted); margin: 0; max-width: 400px; }
+.age-btns { display: flex; gap: 12px; margin-top: 10px; }
+.age-btns .btn { min-width: 120px; }
+#ageYes { background: linear-gradient(90deg, #ff1f8f, #ff8a3d); color: #fff; border: 0; box-shadow: 0 8px 26px -8px #ff1f8f; }
 dialog::backdrop { background: #000c; backdrop-filter: blur(4px); }
 #authDlg, #payDlg, #promoDlg { width: min(440px, calc(100vw - 32px)); }
 .close-x { position: absolute; top: 12px; right: 12px; z-index: 5; border: 0; background: #000a; width: 36px; height: 36px; border-radius: 50%; font-size: 19px; color: #fff; }
@@ -492,6 +521,12 @@ footer .fine { grid-column: 1 / -1; border-top: 1px solid var(--line); padding-t
   </div>
 </dialog>
 
+<dialog id="ageDlg" aria-labelledby="ageTitle">
+  <div class="age"><div class="age-ic">18+</div><h2 id="ageTitle">Та 18 нас хүрсэн үү?</h2>
+    <p>Энэ хэсэг зөвхөн 18 ба түүнээс дээш насны хүмүүст зориулагдсан.</p>
+    <div class="age-btns"><button class="btn" id="ageYes">Тийм, 18+</button><button class="btn" id="ageNo">Үгүй</button></div></div>
+</dialog>
+
 <dialog id="payDlg" aria-labelledby="pTitle">
   <button class="close-x" data-close aria-label="Хаах">×</button>
   <div class="pay" id="payBody"></div>
@@ -565,11 +600,18 @@ footer .fine { grid-column: 1 / -1; border-top: 1px solid var(--line); padding-t
   const playIc = '<svg viewBox="0 0 24 24"><path d="M7 4v16l13-8z"/></svg>';
   const isAdult = (m) => tagsOf(m).some((t) => /18/.test(t)) || /18/.test(m?.age_rating || "");
   const adultOK = () => store.get("kz.adult", false) === true;
-  function confirmAge() {
+  let ageNext = null;
+  function confirmAge(next) {
     if (adultOK()) return true;
-    if (!confirm("Энэ кино 18 наснаас дээш хүнд зориулагдсан. Та 18 нас хүрсэн үү?")) return false;
-    store.set("kz.adult", true); try { render(); } catch {} return true;
+    ageNext = next || null;
+    const d = $("#ageDlg"); if (!d.open) d.showModal();
+    return false;
   }
+  $("#ageYes").addEventListener("click", () => {
+    store.set("kz.adult", true); $("#ageDlg").close(); try { render(); } catch {}
+    const n = ageNext; ageNext = null; if (n) n();
+  });
+  $("#ageNo").addEventListener("click", () => { ageNext = null; $("#ageDlg").close(); });
   function posterHTML(m, withBadges = true, priority = false) {
     const badge = !withBadges ? "" : !m.has_video ? `<span class="badge soon">Удахгүй</span>` : isNew(m) ? `<span class="badge">Шинэ</span>` : "";
     return `<div class="poster${isAdult(m) && !adultOK() ? " adult" : ""}" style="--h1:${+m.hue1 || 340};--h2:${+m.hue2 || 260}">
@@ -737,7 +779,7 @@ footer .fine { grid-column: 1 / -1; border-top: 1px solid var(--line); padding-t
   // ---------- Дэлгэрэнгүй ----------
   async function openMovie(id, playing = null) {
     const m = state.movies.find((x) => x.id === id); if (!m) return;
-    if (isAdult(m) && !confirmAge()) return;
+    if (isAdult(m) && !confirmAge(() => openMovie(id, playing))) return;
     if (!playing) track("ViewContent", { content_ids: [String(m.id)], content_name: m.title, content_type: "product" });
     state.current = m;
     const eps = m.kind === "series" ? await loadEpisodes(m.id) : [];
@@ -868,7 +910,7 @@ footer .fine { grid-column: 1 / -1; border-top: 1px solid var(--line); padding-t
 
   async function play(id) {
     const m = state.movies.find((x) => x.id === id); if (!m || !m.has_video) return;
-    if (isAdult(m) && !confirmAge()) return;
+    if (isAdult(m) && !confirmAge(() => play(id))) return;
     if (m.kind === "series") {
       const eps = await loadEpisodes(id); const pr = state.progress.get(id);
       const ep = (pr?.episode_id && eps.find((e) => e.id === pr.episode_id)) || eps[0];
@@ -906,11 +948,16 @@ footer .fine { grid-column: 1 / -1; border-top: 1px solid var(--line); padding-t
 
   // ---------- Эрх, багц ----------
   const fmt = (n) => Number(n).toLocaleString("mn-MN").replace(/ /g, ",") + "₮";
-  const hasAccess = (movieId) => state.ents.some((e) => new Date(e.expires_at).getTime() > Date.now() && (e.movie_id == null || e.movie_id === movieId));
+  // Энгийн багц 18+ кино оруулахгүй, 18+ багц энгийн кино оруулахгүй ("all" = хуучин/админы эрх, бүгд)
+  const hasAccess = (movieId) => {
+    const m = state.movies.find((x) => x.id === movieId), ad = m ? isAdult(m) : false;
+    return state.ents.some((e) => new Date(e.expires_at).getTime() > Date.now() && (e.movie_id === movieId ||
+      (e.movie_id == null && (!e.scope || e.scope === "all" || (e.scope === "adult") === ad))));
+  };
   async function loadAccess() {
     state.ents = []; state.isAdmin = false;
     if (sb && state.user) {
-      const [{ data }, adm] = await Promise.all([sb.from("entitlements").select("movie_id,expires_at").gt("expires_at", new Date().toISOString()), sb.rpc("is_admin")]);
+      const [{ data }, adm] = await Promise.all([sb.from("entitlements").select("movie_id,expires_at,scope").gt("expires_at", new Date().toISOString()), sb.rpc("is_admin")]);
       state.ents = data || []; state.isAdmin = adm?.data === true;
     }
     const sub = state.ents.filter((e) => e.movie_id == null).sort((a, b) => b.expires_at.localeCompare(a.expires_at))[0];
@@ -920,7 +967,7 @@ footer .fine { grid-column: 1 / -1; border-top: 1px solid var(--line); padding-t
   }
   async function loadPlans() {
     if (!sb) return;
-    const { data } = await sb.from("plans").select("code,title,amount,old_amount,hours,kind,sort,badge,description").eq("active", true);
+    const { data } = await sb.from("plans").select("code,title,amount,old_amount,hours,kind,sort,badge,description,scope").eq("active", true);
     state.plans = {}; (data || []).forEach((p) => { state.plans[p.code] = p; });
   }
   const subPlans = () => Object.values(state.plans).filter((p) => p.kind !== "rent").sort((a, b) => (a.sort ?? 0) - (b.sort ?? 0) || a.amount - b.amount);
@@ -930,6 +977,19 @@ footer .fine { grid-column: 1 / -1; border-top: 1px solid var(--line); padding-t
       <b>${esc(title || p.title)}${p.badge ? ` <span class="pbadge">${esc(p.badge)}</span>` : ""}</b>
       <span class="price">${p.old_amount && !title ? `<s>${fmt(p.old_amount)}</s>` : ""}${fmt(price || p.amount)}</span>
       <small>${esc(sub || p.description || `Бүх кино, цуврал · ${Math.round(p.hours / 24)} хоног`)}</small></button>`;
+  const stdPlans = () => subPlans().filter((p) => p.scope !== "adult");
+  const adultPlans = () => subPlans().filter((p) => p.scope === "adult");
+  const pkCard = (p, movieId) => {
+    const chips = String(p.badge || "").split("|").map((c) => c.trim()).filter(Boolean), hot = chips.some((c) => /санал/i.test(c));
+    return `<button class="pk${hot ? " hot" : ""}" data-buy="${esc(p.code)}" data-movie="${movieId ?? ""}" ${PAY ? "" : "disabled"}>
+      ${chips.length ? `<span class="chips">${chips.map((c, i) => `<span class="chip${i ? " o" : ""}">${esc(c)}</span>`).join("")}</span>` : ""}
+      <b>${esc(p.title)}</b><span class="sub">${Math.round(p.hours / 24)} хоног · ${p.scope === "adult" ? "зөвхөн 18+ кинонууд" : "бүх кино"}</span>
+      <span class="pr">${fmt(p.amount)}${p.old_amount ? `<s>${fmt(p.old_amount)}</s>` : ""}</span>
+      ${p.description ? `<small>${esc(p.description)}</small>` : ""}</button>`;
+  };
+  const adultBlock = (movieId) => adultPlans().length ? `<h3 class="pk-18"><span class="b18">18+</span> Насанд хүрэгчдийн багц</h3>
+      <p class="pk-note">Зөвхөн 18+ кинонуудыг үзнэ. Энгийн багцад 18+ кино ордоггүй, 18+ багцад энгийн кино ордоггүй.</p>
+      <div class="pk-grid">${adultPlans().map((p) => pkCard(p, movieId)).join("")}</div>` : "";
   const soonNote = PAY ? "" : `<div class="soon-box">Төлбөрийн систем удахгүй нээгдэнэ. Тун удахгүй QPay-ээр төлөөд үзэх боломжтой болно.</div>`;
   function openPaywall(m) {
     stopPolling();
@@ -938,8 +998,9 @@ footer .fine { grid-column: 1 / -1; border-top: 1px solid var(--line); padding-t
       <p class="note">${m.kind === "series" ? "Бүх ангийг үзэхийн тулд багц эсвэл түрээс сонгоно уу." : "Багц эсвэл түрээс сонгоно уу."}</p>
       ${soonNote}
       ${rent && rentPrice ? planBtn(rent, m.id, m.kind === "series" ? "Зөвхөн энэ цуврал" : "Зөвхөн энэ кино", rentPrice, `${rent.hours} цагийн турш үзнэ`) : ""}
-      ${subPlans().map((p) => planBtn(p, m.id)).join("")}
+      ${isAdult(m) ? adultBlock(m.id) : `<div class="pk-grid">${stdPlans().map((p) => pkCard(p, m.id)).join("")}</div>`}
       <div class="msg" id="payMsg" role="status"></div>`;
+    $("#payDlg").classList.add("wide");
     if ($("#movieDlg").open) $("#movieDlg").close();
     if (!$("#payDlg").open) $("#payDlg").showModal();
   }
@@ -947,12 +1008,18 @@ footer .fine { grid-column: 1 / -1; border-top: 1px solid var(--line); padding-t
     $("#menu").hidden = true;
     if (PAY && !state.user) { openAuth("Багц авахын тулд эхлээд нэвтэрнэ үү."); return; }
     stopPolling();
-    $("#payBody").innerHTML = `<h2 id="pTitle">Багц сонгох</h2><p class="note">Бүх кино, цувралыг хязгааргүй үзнэ.</p>${soonNote}
-      ${subPlans().map((p) => planBtn(p, null)).join("") || `<p class="note">Одоогоор идэвхтэй багц алга.</p>`}<div class="msg" id="payMsg" role="status"></div>`;
+    const rent = rentPlan();
+    $("#payBody").innerHTML = `<h2 id="pTitle">Багц сонгох</h2><p class="note">Нэг багцаар бүх киног хязгааргүй үзээрэй.</p>${soonNote}
+      ${stdPlans().length ? `<div class="pk-grid">${stdPlans().map((p) => pkCard(p, null)).join("")}</div>` : `<p class="note">Одоогоор идэвхтэй багц алга.</p>`}
+      ${adultBlock(null)}
+      ${rent ? `<div class="pk-one"><b>Зөвхөн нэг кино</b><p class="pk-note">Кино бүр өөрийн үнэтэй бөгөөд ${rent.hours} цагийн турш үзэх эрх өгнө. Киноны хуудаснаас "Түрээслэх" дарна уу.</p></div>` : ""}
+      <div class="msg" id="payMsg" role="status"></div>`;
+    $("#payDlg").classList.add("wide");
     if (!$("#payDlg").open) $("#payDlg").showModal();
   }
   async function buy(plan, movieId) {
     if (!PAY) return;
+    if (state.plans[plan]?.scope === "adult" && !confirmAge(() => buy(plan, movieId))) return;
     const msg = $("#payMsg"); msg.className = "msg"; msg.textContent = "Нэхэмжлэх үүсгэж байна…";
     document.querySelectorAll("[data-buy]").forEach((b) => (b.disabled = true));
     const pl = state.plans[plan] || {};
@@ -964,6 +1031,7 @@ footer .fine { grid-column: 1 / -1; border-top: 1px solid var(--line); padding-t
       msg.className = "msg err"; msg.textContent = "Нэхэмжлэх үүсгэж чадсангүй: " + text;
       document.querySelectorAll("[data-buy]").forEach((b) => (b.disabled = false)); return;
     }
+    $("#payDlg").classList.remove("wide");
     $("#payBody").innerHTML = `<h2 id="pTitle">QPay-ээр төлөх · ${fmt(data.amount)}</h2><p class="note">${esc(data.description)}</p>
       <div style="display:grid;justify-items:center;gap:10px">${data.qr_image ? `<img src="data:image/png;base64,${data.qr_image}" alt="QPay QR" style="width:min(240px,100%);background:#fff;border-radius:12px;padding:10px">` : ""}<span class="note">Банкны апп-аараа QR кодыг уншуулна уу</span></div>
       ${data.urls?.length ? `<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(64px,1fr));gap:10px">${data.urls.map((u) => `<a href="${esc(u.link)}" style="display:grid;justify-items:center;gap:4px;text-decoration:none;color:var(--muted);font-size:10px;text-align:center"><img src="${esc(u.logo)}" alt="" loading="lazy" style="width:44px;height:44px;border-radius:10px;background:#fff">${esc(u.name)}</a>`).join("")}</div>` : ""}
