@@ -982,6 +982,7 @@ footer .fine { grid-column: 1 / -1; border-top: 1px solid var(--line); padding-t
       (e.movie_id == null && (!e.scope || e.scope === "all" || (e.scope === "adult") === ad))));
   };
   async function loadAccess() {
+    setTimeout(flushPurchases, 1500);
     state.ents = []; state.isAdmin = false;
     if (sb && state.user) {
       const [{ data }, adm] = await Promise.all([sb.from("entitlements").select("movie_id,expires_at,scope").gt("expires_at", new Date().toISOString()), sb.rpc("is_admin")]);
@@ -1064,6 +1065,7 @@ footer .fine { grid-column: 1 / -1; border-top: 1px solid var(--line); padding-t
       ${data.urls?.length ? `<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(64px,1fr));gap:10px">${data.urls.map((u) => `<a href="${esc(u.link)}" style="display:grid;justify-items:center;gap:4px;text-decoration:none;color:var(--muted);font-size:10px;text-align:center"><img src="${esc(u.logo)}" alt="" loading="lazy" style="width:44px;height:44px;border-radius:10px;background:#fff">${esc(u.name)}</a>`).join("")}</div>` : ""}
       <div class="note" id="payState">Төлбөр хүлээж байна…</div><button class="btn primary wide" id="checkPay">Төлсөн — шалгах</button>`;
     state.pay = { id: data.payment_id, movieId, plan, amount: data.amount, hidden: !!data.hidden, until: Date.now() + 6e5 };
+    pendAdd({ id: data.payment_id, amount: data.amount, hidden: !!data.hidden, t: Date.now() });
     $("#checkPay").addEventListener("click", () => checkPay(true));
     state.payTimer = setInterval(() => checkPay(false), 3000);
   }
@@ -1073,9 +1075,28 @@ footer .fine { grid-column: 1 / -1; border-top: 1px solid var(--line); padding-t
     let paid = false;
     if (manual) { const { data } = await sb.functions.invoke("qpay", { body: { action: "check", payment_id: p.id } }); paid = data?.status === "paid"; if (!paid) $("#payState").textContent = "Төлбөр хараахан ороогүй байна."; }
     else { const { data } = await sb.from("payments").select("status").eq("id", p.id).maybeSingle(); paid = data?.status === "paid"; }
-    if (paid) { stopPolling(); $("#payDlg").close(); toast("Төлбөр амжилттай. Сайхан үзээрэй!"); !p.hidden && track("Purchase", { value: Number(p.amount) || 0, currency: "MNT" }, { eventID: p.id }); await loadAccess(); if (p.movieId) play(p.movieId); }
+    if (paid) { stopPolling(); $("#payDlg").close(); toast("Төлбөр амжилттай. Сайхан үзээрэй!"); !p.hidden && track("Purchase", { value: Number(p.amount) || 0, currency: "MNT" }, { eventID: p.id }); pendDel(p.id); await loadAccess(); if (p.movieId) play(p.movieId); }
   }
   function stopPolling() { clearInterval(state.payTimer); state.payTimer = null; }
+  // Банкны апп руу шилжээд буцаж ирэхэд ч Purchase-ийг Pixel-д илгээнэ (eventID-аар давхардахгүй)
+  const pendGet = () => { try { return JSON.parse(localStorage.getItem("px.pending") || "[]"); } catch { return []; } };
+  const pendSet = (l) => { try { localStorage.setItem("px.pending", JSON.stringify(l.slice(-10))); } catch {} };
+  const pendAdd = (x) => pendSet([...pendGet().filter((y) => y.id !== x.id), x]);
+  const pendDel = (id) => pendSet(pendGet().filter((y) => y.id !== id));
+  let flushing = false;
+  async function flushPurchases() {
+    if (flushing || !sb || !state.user) return; flushing = true;
+    try {
+      const list = pendGet().filter((x) => Date.now() - x.t < 864e5);
+      if (!list.length) { pendSet([]); return; }
+      const { data } = await sb.from("payments").select("id,status").in("id", list.map((x) => x.id));
+      for (const x of list) {
+        const row = (data || []).find((d) => d.id === x.id);
+        if (row?.status === "paid") { if (!x.hidden) track("Purchase", { value: Number(x.amount) || 0, currency: "MNT" }, { eventID: x.id }); pendDel(x.id); }
+      }
+    } catch {} finally { flushing = false; }
+  }
+  document.addEventListener("visibilitychange", () => { if (document.visibilityState === "visible") flushPurchases(); });
 
   // ---------- Нэвтрэлт ----------
   const PHONE = !!cfg.PHONE_LOGIN;
